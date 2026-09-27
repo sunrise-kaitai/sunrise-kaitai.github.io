@@ -289,8 +289,18 @@ def body(key):
     b += '\n<script src="assets/main.js"></script>'
     return b
 
+# セキュリティ用の meta（全ページの <head> の先頭近くに入る）。
+# 外部から読み込めるのは Google Fonts と、フォーム送信先の Google Apps Script だけに制限している。
+# 新しく外部サービス（地図・動画・解析タグなど）を使うときは、ここに許可先を足さないとブロックされる。
+CSP = ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+       "font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; "
+       "connect-src https://script.google.com https://script.googleusercontent.com; form-action 'self'; "
+       "base-uri 'self'; object-src 'none'; frame-src 'none'; upgrade-insecure-requests")
+SECURITY_META = (f'<meta http-equiv="Content-Security-Policy" content="{CSP}">\n'
+                 '<meta name="referrer" content="strict-origin-when-cross-origin">\n')
+
 def full_doc(key):
-    return ('<!doctype html>\n<html lang="ja">\n<head>\n<meta charset="utf-8">\n'
+    return ('<!doctype html>\n<html lang="ja">\n<head>\n<meta charset="utf-8">\n' + SECURITY_META +
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             + head(key) + '\n</head>\n<body>\n' + body(key) + '\n</body>\n</html>\n')
 

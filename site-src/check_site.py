@@ -56,6 +56,18 @@ for f in sorted(pages):
             errors.append(f'{rel}: 構造化データが壊れている {e}')
     if re.search(r'\[ [^\]]*を入力 \]', doc):
         errors.append(f'{rel}: 未記入の仮の文字（[ …を入力 ]）が残っている')
+    # セキュリティ: CSP・referrer の meta があるか、CSP でブロックされる書き方（インラインの script・onclick 等）がないか
+    if '<meta http-equiv="Content-Security-Policy"' not in doc:
+        errors.append(f'{rel}: Content-Security-Policy の meta がない')
+    if '<meta name="referrer" content="strict-origin-when-cross-origin">' not in doc:
+        errors.append(f'{rel}: referrer の meta がない')
+    for tag in re.findall(r'<script\b[^>]*>', doc):
+        if 'src=' not in tag and 'application/ld+json' not in tag:
+            errors.append(f'{rel}: インラインの <script> は CSP でブロックされる {tag}')
+    if re.search(r'<[^>]+\son[a-z]+="', doc):
+        errors.append(f'{rel}: onclick などのイベント属性は CSP でブロックされる')
+    if '<iframe' in doc:
+        errors.append(f'{rel}: <iframe> は CSP（frame-src none）でブロックされる')
     if '404' not in rel:
         c = re.search(r'<link rel="canonical" href="([^"]+)"', doc)
         if not c:
