@@ -1473,13 +1473,14 @@ const FORM_ENDPOINT='https://script.google.com/macros/s/AKfycbzMB2zlNcDNW7qnFhyj
 (function(){
   const f=document.getElementById('form'),btn=document.getElementById('sendBtn'),err=document.getElementById('err'),done=document.getElementById('done');
   const v=k=>(document.getElementById(k).value||'').trim();
+  if(!f)return;   // フォームのないページ（404 など）
   f.addEventListener('submit',async e=>{
     e.preventDefault();
     const miss=[...f.querySelectorAll('[required]')].filter(i=>!i.value.trim()||(i.type==='email'&&!/^\S+@\S+\.\S+$/.test(i.value)));
     if(miss.length){err.textContent='お名前・正しい形式のメールアドレス・ご相談内容を入力してください。';err.hidden=false;miss[0].focus();return}
     err.hidden=true;done.hidden=true;
     if(!FORM_ENDPOINT){done.innerHTML='<span class="todo">送信先がまだ設定されていません。公開前に設定します。</span>';done.hidden=false;return}
-    const data={type:f.querySelector('input[name=type]:checked').value,name:v('name'),org:v('org'),mail:v('mail'),phone:v('phone'),addr:v('addr'),msg:v('msg'),website:v('website')};
+    const data={type:f.querySelector('input[name=type]:checked').value,name:v('name'),org:v('org'),mail:v('mail'),phone:v('phone'),addr:v('addr'),msg:v('msg'),website:v('website'),t:Math.round(performance.now())};  // t = ページを開いてから送信までのミリ秒（3000未満はロボットとして Apps Script 側で破棄）
     btn.disabled=true;btn.firstChild.textContent='送信中… ';
     try{
       await fetch(FORM_ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)});
