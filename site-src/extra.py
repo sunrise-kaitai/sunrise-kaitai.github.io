@@ -132,9 +132,11 @@ def faq_page(service_faqs):
 # each: slug, title, desc, lead, photo, related services, body sections [(h2, html)]
 COLUMNS = []
 
-def col(slug, title, short, desc, photo, related, sections, sources):
+def col(slug, title, short, desc, photo, related, sections, sources, date=DATE):
+    # date: 公開日（YYYY-MM-DD）。省略時はサイト公開日
     COLUMNS.append(dict(slug=slug, title=title, short=short, desc=desc, photo=photo,
-                        related=related, sections=sections, sources=sources))
+                        related=related, sections=sections, sources=sources,
+                        date=date, date_jp=date.replace('-', '.')))
 
 col('asbestos-survey',
     '解体・リフォーム前のアスベスト事前調査は義務です｜対象・報告・注意点',
@@ -254,6 +256,44 @@ col('genjo-skeleton',
       + '<p><a class="art-link" href="restore.html">原状回復工事のページを見る →</a>　<a class="art-link" href="interior.html">内装解体のページを見る →</a></p>')],
     [])
 
+col('nagoya-tenant-interior',
+    '名古屋でテナントの内装解体・スケルトン工事をする流れ｜管理会社への申請から引き渡しまで',
+    '名古屋の内装解体の流れ',
+    '名古屋市（中村区・中川区・港区・西区など）で店舗やオフィスの内装解体・スケルトン工事をするときの流れを、管理会社への工事申請、アスベスト事前調査、廃材の処分、引き渡しの立会いまで順番に解説します。',
+    7, ['interior', 'restore'],
+    [('この記事でわかること',
+      P('店舗やオフィスを退去するときや、居抜きではなく一から内装をつくり直すときには、今ある内装を取り払う「内装解体」が必要になります。床・壁・天井の下地まで撤去して建物の骨組みだけに戻す工事は「スケルトン工事」と呼ばれます。')
+      + P('この記事では、名古屋市内のテナントビルや路面店で内装解体を進めるときの流れと、事前に確認しておきたいことをまとめました。原状回復との違いは<a class="art-link" href="column/genjo-skeleton.html">原状回復とスケルトン工事の違い</a>で解説しています。')),
+     ('まず確認したい3つのこと',
+      '<ol class="art-ol"><li><b>どこまで撤去するか：</b>賃貸借契約書の特約や、入居時の引き渡し条件で決まります。スケルトンで返すのか、入居時の内装に戻すのかで工事の内容が大きく変わります。</li>'
+      '<li><b>ビルの工事ルール：</b>作業できる時間帯、エレベーターや搬出経路の使い方、共用部の養生の範囲、工事申請の期限を管理会社に確認します。</li>'
+      '<li><b>退去日（引き渡し日）：</b>工事申請や近隣への周知にも日数がかかるため、退去日から逆算して段取りします。</li></ol>'),
+     ('工事の流れ',
+      '<ol class="art-ol">'
+      '<li><b>現地調査・お見積り：</b>内装の仕様、撤去する設備（空調・厨房・電気・給排水）、搬出経路を確認します。</li>'
+      '<li><b>アスベストの事前調査：</b>内装解体も改修工事にあたるため、工事の前に事前調査が必要です。請負金額が税込100万円以上の改修工事では、調査の結果を行政へ報告します。</li>'
+      '<li><b>管理会社への工事申請・近隣への周知：</b>工程表や作業員名簿などを出し、同じビルのテナントや近隣へ工事の予定を知らせます。</li>'
+      '<li><b>養生・解体：</b>共用部や残す部分を養生してから、内装材や設備を撤去します。廃材は木くず・金属・石こうボードなどに分けて集めます。</li>'
+      '<li><b>搬出・処分：</b>分別した廃材を運び出し、産業廃棄物として法令に沿って処分します。</li>'
+      '<li><b>清掃・引き渡しの立会い：</b>管理会社やオーナーの立会いで仕上がりを確認し、引き渡します。</li></ol>'
+      + P('なお、建設リサイクル法の届出が必要になるのは、修繕・模様替え（内装工事など）の場合、請負代金が1億円以上の工事です。一般的なテナントの内装解体では届出の対象にならないことが多いですが、建物ごと解体する場合は床面積80㎡以上で届出が必要です。')),
+     ('工期と費用が変わるポイント',
+      UL(['<b>面積と内装の仕様：</b>二重天井や造作壁、床のかさ上げがあると撤去する量が増えます。',
+          '<b>撤去する設備：</b>厨房機器、ダクト、空調、給排水・ガス配管の撤去が含まれるかどうか。',
+          '<b>作業時間の制限：</b>営業中のビルで音の出る作業が夜間や休日に限られると、その分工期が延びます。',
+          '<b>搬出のしやすさ：</b>エレベーターの大きさや使える時間、トラックを停める場所。',
+          '<b>アスベストの有無：</b>含有建材が見つかった場合は、除去の手間と処分の費用が加わります。'])
+      + P('見積りを比べるときは、撤去する範囲と、廃材の処分費や養生費が含まれているかを確認しましょう。<a class="art-link" href="column/demolition-cost-factors.html">解体費用が決まるポイント</a>も参考にしてください。')),
+     ('名古屋市西側（中村区・中川区・港区・西区）でのご相談',
+      P('株式会社sunriseは、名古屋市の西どなりのあま市に拠点があります。中村区・中川区・港区・西区など名古屋市の西側は、現地調査や工事中の対応にうかがいやすい地域です。もちろん名古屋市のほかの区や、愛知県全域からのご相談も承ります。')
+      + P('名古屋市で解体工事をするときの助成制度や届出先は、<a class="art-link" href="area-nagoya.html">名古屋市の解体工事のページ</a>にまとめています。')),
+     ('sunriseにご相談いただく場合',
+      P('株式会社sunriseでは、店舗・オフィスの内装解体とスケルトン工事、原状回復まで承ります。管理会社への工事申請に必要な書類の準備や、アスベストの事前調査もまとめてご相談いただけます。現地調査・お見積りは無料です。')
+      + '<p><a class="art-link" href="interior.html">内装解体のページを見る →</a>　<a class="art-link" href="restore.html">原状回復工事のページを見る →</a></p>')],
+    [('建設リサイクル法の概要（環境省）', 'https://www.env.go.jp/recycle/build/gaiyo.html'),
+     ('石綿事前調査結果報告システム（厚生労働省）', 'https://www.ishiwata-houkoku.mhlw.go.jp/')],
+    date='2026-09-29')
+
 col('demolition-cost-factors',
     '解体費用はどう決まる？見積りで確認したい7つのポイント',
     '解体費用が決まるポイント',
@@ -297,7 +337,7 @@ def column_page(c):
     return f'''<div class="page" data-page="col-{c['slug']}">
   <header class="pg-hd w"><div class="pg-hd-l">
     <nav class="crumb mono" aria-label="現在地"><a href="index.html">TOP</a><span>/</span><a href="column.html">COLUMN</a><span>/</span><b>{c['short']}</b></nav>
-    <p class="svc-no">COLUMN <time datetime="{DATE}">{DATE_JP}</time></p>
+    <p class="svc-no">COLUMN <time datetime="{c['date']}">{c['date_jp']}</time></p>
     <h1 class="art-title">{c['title']}</h1>
   </div>
   <div class="ph pg-photo"><img data-photo="{c['photo']}" alt="{c['short']}のイメージ（株式会社sunriseの現場）"></div>
@@ -319,7 +359,7 @@ def column_page(c):
 def column_index():
     cards = ''
     for c in COLUMNS:
-        cards += f'''<a class="col-card" href="column/{c['slug']}.html"><div class="ph"><img data-photo="{c['photo']}" alt=""></div><div><p class="mono"><time datetime="{DATE}">{DATE_JP}</time></p><b>{c['title']}</b><span>{c['desc'][:70]}…</span></div></a>'''
+        cards += f'''<a class="col-card" href="column/{c['slug']}.html"><div class="ph"><img data-photo="{c['photo']}" alt=""></div><div><p class="mono"><time datetime="{c['date']}">{c['date_jp']}</time></p><b>{c['title']}</b><span>{c['desc'][:70]}…</span></div></a>'''
     return f'''<div class="page" data-page="column">
 {pg_header('column', 'COLUMN', 'コラム', '解体工事の前に知っておきたいことを、<br>現場の目線でまとめています。', 7)}
   <section class="pg-sec w">
