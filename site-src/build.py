@@ -211,7 +211,7 @@ def head(key):
         lines.append(jsonld({"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": crumbs}))
     if 'col' in p:
         lines.append(jsonld({"@context": "https://schema.org", "@type": "Article", "headline": p['col']['title'],
-                             "description": p['desc'], "datePublished": extra.DATE, "dateModified": extra.DATE,
+                             "description": p['desc'], "datePublished": p['col']['date'], "dateModified": p['col']['date'],
                              "image": DOMAIN.rstrip('/') + '/img/p%02d.%s' % (p['col']['photo'], 'jpg' if COMPAT else 'webp'),
                              "mainEntityOfPage": u,
                              "author": {"@type": "Organization", "name": "株式会社sunrise", "url": DOMAIN},
