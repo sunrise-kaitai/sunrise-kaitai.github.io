@@ -378,7 +378,11 @@ for out in ['dist', 'preview']:
 # ---------- 採用ページ（/recruit）はユーザーが選んだ専用デザイン版で上書き ----------
 # site-src/recruit_page/page.html（完成HTML）と recruit.js をそのまま置く。CSP対応済み（インラインscriptなし）。
 # ※ページ一覧・サイトマップ・リンクは EXTRA['recruit'] のまま使う。文章・デザインはユーザー確認済みの版なので変更しない。
-shutil.copy('recruit_page/page.html', 'dist/recruit.html')
+# recruit.js を更新したときに古いファイルがブラウザに残らないよう、中身から作った番号を付けて読み込ませる
+import hashlib
+_rv = hashlib.sha256(open('recruit_page/recruit.js', 'rb').read()).hexdigest()[:10]
+open('dist/recruit.html', 'w', encoding='utf-8').write(
+    open('recruit_page/page.html', encoding='utf-8').read().replace('src="/assets/recruit.js"', f'src="/assets/recruit.js?v={_rv}"'))
 shutil.copy('recruit_page/recruit.js', 'dist/assets/recruit.js')
 
 # ---------- 404 ----------

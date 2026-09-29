@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Big+Shoulders+Display:wght@700;900&family=DotGothic16&family=IBM+Plex+Mono:wght@400&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
 /* layout: 実写の現場スライドで始まり、4つの夢→成り上がりロード→現場→要項→CTA。黒×重機オレンジ×白 */
 :root{
@@ -380,19 +380,15 @@ footer .w{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px}
   </div>
 </div></header>
 <nav class="rnav" id="rnav" aria-label="メニュー" hidden>
-  <button class="rnav-close" id="rnav-close" type="button">CLOSE ✕</button>
+  <button class="rnav-close" id="rnav-close" type="button">CLOSE</button>
   <div class="rnav-list">
-    <a href="/"><span>TOP</span><small>トップページ</small></a>
-    <a href="/#about"><span>ABOUT</span><small>私たちについて</small></a>
-    <a href="/building"><span>BUILDING</span><small>建屋解体</small></a>
-    <a href="/interior"><span>INTERIOR</span><small>内装解体</small></a>
-    <a href="/restore"><span>RESTORE</span><small>原状回復</small></a>
-    <a href="/asbestos"><span>ASBESTOS</span><small>アスベスト調査・除去</small></a>
-    <a href="/area"><span>AREA</span><small>対応エリア</small></a>
-    <a href="/faq"><span>FAQ</span><small>よくあるご質問</small></a>
-    <a href="/column/"><span>COLUMN</span><small>コラム</small></a>
-    <a href="/recruit" aria-current="page"><span>RECRUIT</span><small>採用情報</small></a>
-    <a href="/#contact"><span>CONTACT</span><small>お問い合わせ</small></a>
+    <a href="/#about"><span class="n">ABOUT</span><b>ABOUT</b><small>私たちについて</small></a>
+    <a href="/building"><span class="n">SERVICE 01</span><b>BUILDING</b><small>建屋解体</small></a>
+    <a href="/interior"><span class="n">SERVICE 02</span><b>INTERIOR</b><small>内装解体</small></a>
+    <a href="/restore"><span class="n">SERVICE 03</span><b>RESTORE</b><small>原状回復</small></a>
+    <a href="/asbestos"><span class="n">SERVICE 04</span><b>ASBESTOS</b><small>アスベスト調査・除去</small></a>
+    <a href="/recruit" aria-current="page"><span class="n">RECRUIT</span><b>RECRUIT</b><small>採用情報</small></a>
+    <a href="/#contact"><span class="n">CONTACT</span><b>CONTACT</b><small>お問い合わせ</small></a>
   </div>
 </nav>
 <style>
@@ -403,20 +399,21 @@ footer .w{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px}
 .hd-menu{width:46px;height:46px;display:inline-flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:7px;background:none;border:0;cursor:pointer;padding:0 4px}
 .hd-menu i{display:block;height:2px;background:var(--ink);width:30px}
 .hd-menu i+i{width:20px}
-.rnav{position:fixed;inset:0;z-index:1000;background:#0a0a0a;overflow:auto;padding:84px 24px 40px}
+.rnav{position:fixed;inset:0;z-index:1000;background:#F6F3EE;color:#1A2638;overflow:auto;color-scheme:light}
 .rnav[hidden]{display:none}
-.rnav-close{position:absolute;top:18px;right:20px;min-height:44px;padding:0 16px;background:none;border:1.5px solid var(--ink);border-radius:999px;color:var(--ink);font-family:var(--en);letter-spacing:.16em;cursor:pointer}
-.rnav-list{max-width:920px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:4px 32px}
-.rnav-list a{display:flex;align-items:baseline;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none}
-.rnav-list a span{font-family:var(--en);font-size:28px;letter-spacing:.04em}
-.rnav-list a small{color:var(--sub);font-size:13px}
-.rnav-list a:hover span,.rnav-list a[aria-current] span{color:var(--or)}
+.rnav-close{position:absolute;right:clamp(16px,4vw,64px);top:calc(20px + env(safe-area-inset-top,0px));background:none;border:1px solid #1A2638;border-radius:999px;color:#1A2638;font-family:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;font-weight:700;letter-spacing:.18em;font-size:14px;padding:7px 20px;cursor:pointer;z-index:2}
+.rnav-list{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;min-height:100svh;padding:calc(76px + env(safe-area-inset-top,0px)) clamp(16px,4vw,64px) calc(12px + env(safe-area-inset-bottom,0px))}
+.rnav-list a{flex:1 1 0;display:grid;grid-template-columns:110px minmax(0,1fr);align-items:end;align-content:center;gap:0 12px;border-bottom:1px solid #D8D0C3;padding-block:4px;color:#1A2638;text-decoration:none}
+.rnav-list a:last-child{border-bottom:0}
+.rnav-list .n{white-space:nowrap;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.14em;color:#B4521A;grid-row:span 2;align-self:center}
+.rnav-list b{font-family:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;font-weight:900;font-size:clamp(28px,min(3.4vw,6.2svh),52px);line-height:.95;letter-spacing:.02em}
+.rnav-list small{font-size:11px;color:#6E6A64;letter-spacing:.2em;line-height:1.5}
+.rnav-list a:hover b,.rnav-list a[aria-current] b{color:#E2702A}
 @media (max-width:760px){
   .hd-r{gap:6px}
   .hd-tel{padding:0 12px;min-height:40px}
   .hd-pill{min-height:36px;padding:0 12px;font-size:12px;letter-spacing:.1em}
   .hd-menu{width:40px}
-  .rnav-list a span{font-size:24px}
 }
 @media (max-width:380px){.hd-tel .sp{display:none}}
 </style>
