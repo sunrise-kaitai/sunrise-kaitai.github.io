@@ -374,6 +374,13 @@ for out in ['dist', 'preview']:
             doc = clean_links(doc)
         write(f'{out}/{out_file(p["file"]) if is_dist else p["file"]}', doc)
 
+
+# ---------- 採用ページ（/recruit）はユーザーが選んだ専用デザイン版で上書き ----------
+# site-src/recruit_page/page.html（完成HTML）と recruit.js をそのまま置く。CSP対応済み（インラインscriptなし）。
+# ※ページ一覧・サイトマップ・リンクは EXTRA['recruit'] のまま使う。文章・デザインはユーザー確認済みの版なので変更しない。
+shutil.copy('recruit_page/page.html', 'dist/recruit.html')
+shutil.copy('recruit_page/recruit.js', 'dist/assets/recruit.js')
+
 # ---------- 404 ----------
 NOTFOUND = ('<main><div class="page" data-page="notfound"><header class="pg-hd w"><div class="pg-hd-l">\n'
             '<p class="svc-no">404 NOT FOUND</p><h1 class="pg-title">404</h1><p class="pg-jp">ページが見つかりません</p>\n'
