@@ -273,6 +273,9 @@ def body(key):
         main = fill_alts(main, f'{p["jp"]}の施工写真')
         main = real_imgs(main, eager_first=1)
     nav_h = real_imgs(fill_alts(nav, '解体工事の現場'))
+    if WITH_EXTRA:
+        # メニューの「RECRUIT 採用情報」は採用ページ（/recruit）を開く
+        nav_h = nav_h.replace('<a href="#recruit"><span class="n">RECRUIT</span>', '<a href="recruit.html"><span class="n">RECRUIT</span>', 1)
     ft = footer
     if WITH_EXTRA:
         ft = ft.replace('<a href="#contact">Contact</a></nav>',
