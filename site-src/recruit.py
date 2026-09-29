@@ -25,8 +25,7 @@ def SEC(en, jp, inner, art=True, cls=''):
 def page(src):
     rec = re.search(r'<section[^>]*id="recruit".*?</section>', src, re.S).group(0)
     message = re.search(r'<p class="svc-desc[^"]*"[^>]*>(.*?)</p>', rec, re.S).group(1)
-    jobs = re.search(r'<div class="jobs">.*?</div>\s*</section>', rec, re.S).group(0)
-    jobs = jobs[:jobs.rindex('</section>')].rstrip()
+    jobs = re.search(r'<div class="jobs">.*?</article>\s*</div>', rec, re.S).group(0)
     jobs = jobs.replace(' rv"', '"')   # 専用ページでは最初から表示する（紺色の背景はトップと同じ .rec で付ける）
     terms = ''
     if RECRUIT_TERMS:

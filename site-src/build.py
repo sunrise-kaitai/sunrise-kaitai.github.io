@@ -283,12 +283,9 @@ def body(key):
         # 地域ページへのリンク（フッター）
         ft = ft.replace('</nav>\n  </div>', '</nav>\n    <nav class="ft-reg" aria-label="地域別のご案内">'
                         + ''.join(f'<a href="{f}">{t}</a>' for f, t in region.LINK_LABELS) + '</nav>\n  </div>', 1)
-        # 採用：フッターは採用ページへ、トップの採用欄の下に詳細へのリンク
+        # 採用：フッターは採用ページへ（トップの採用欄の「採用ページを見る」は src/site.html に記載）
         ft = ft.replace('<a href="#recruit">Recruit</a>', '<a href="recruit.html">Recruit</a>', 1)
         if is_home:
-            main = re.sub(r'(<section class="svc rec w" id="recruit">.*?)(</section>)',
-                          lambda m: m.group(1) + '<p class="rec-more" style="margin-top:28px"><a class="more" href="recruit.html">採用情報を詳しく見る <i>→</i></a></p>\n' + m.group(2),
-                          main, count=1, flags=re.S)
             main = main.replace('<p class="map-src">', '<p><a class="more" href="area.html">対応市町村を見る <i>→</i></a></p>\n    '
                                 '<p class="map-note map-reg">地域別のご案内：' + '／'.join(f'<a href="{f}">{t}</a>' for f, t in region.LINK_LABELS)
                                 + '</p>\n    <p class="map-src">', 1)
