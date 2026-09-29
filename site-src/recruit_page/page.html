@@ -409,6 +409,14 @@ body{background:var(--bg);color:var(--ink)}
 /* 上のバー：写真の上では白文字、スクロール後はホームページと同じ明るいバー */
 .hd.s{background:rgba(246,243,238,.95);border-bottom:1px solid #D8D0C3;--ink:#1A2638;--sub:#6E6A64;color:var(--ink)}
 .hd.s .hd-pill{background:transparent}
+/* 画面下（PCは右下）のボタン：上のバーと同じ「電話番号」＋「CONTACT」の見た目 */
+.fix{gap:10px;align-items:center;background:rgba(246,243,238,.96);border-top:1px solid #D8D0C3}
+.fix a{min-height:52px;flex-direction:row;gap:8px;font-weight:900}
+.fix .t{background:var(--or);color:#111;padding:0 20px}
+.fix .t .en{font-family:var(--en);font-size:19px;letter-spacing:.02em}
+.fix .f{flex:0 0 auto;padding:0 24px;border:1.5px solid #1A2638;border-radius:999px;color:#1A2638;background:#F6F3EE;font-family:var(--en);letter-spacing:.16em;font-size:15px;min-height:46px}
+.fix .f:hover{background:#1A2638;color:#F6F3EE}
+@media (min-width:901px){.fix{width:auto;background:transparent;border:0;padding:0}.fix .t{flex:0 0 auto;box-shadow:0 8px 24px rgba(0,0,0,.18)}.fix .f{box-shadow:0 8px 24px rgba(0,0,0,.12)}}
 /* 寮の欄：上と同じしま模様を下のふちにも */
 .dorm-stripe-b{position:absolute;left:0;right:0;bottom:0;height:10px;z-index:2;background:repeating-linear-gradient(-45deg,var(--or) 0 16px,#111 16px 32px)}
 </style>
@@ -436,7 +444,7 @@ body{background:var(--bg);color:var(--ink)}
   .hd-pill{min-height:36px;padding:0 12px;font-size:12px;letter-spacing:.1em}
   .hd-menu{width:40px}
 }
-@media (max-width:380px){.hd-tel .sp{display:none}}
+@media (max-width:760px){.hd-tel .sp{display:none}.hd-tel{min-width:46px;justify-content:center;font-size:18px}}
 </style>
 
 <main id="top">
@@ -583,7 +591,7 @@ body{background:var(--bg);color:var(--ink)}
 </main>
 
 <footer><div class="w"><p><a href="/">株式会社sunrise ホームページ</a>／愛知県あま市／TEL 090-7686-6461</p><p>建屋解体・内装解体・原状回復・アスベスト調査／除去</p></div></footer>
-<nav class="fix" id="fix" aria-label="問い合わせ"><a class="t" href="tel:09076866461">📞 電話する<small>話を聞くだけでもOK</small></a><a class="f" href="/#contact" >フォーム<small>問い合わせ</small></a></nav>
+<nav class="fix" id="fix" aria-label="問い合わせ"><a class="t" href="tel:09076866461" aria-label="電話する 090-7686-6461">📞 <span class="en">090-7686-6461</span></a><a class="f" href="/#contact">CONTACT</a></nav>
 <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="写真の拡大"><button class="x" type="button" id="lbx" aria-label="閉じる">×</button><figure><img id="lbimg" alt=""><p id="lbcap"></p></figure></div>
 <div class="toast" id="toast" role="status"></div>
 
