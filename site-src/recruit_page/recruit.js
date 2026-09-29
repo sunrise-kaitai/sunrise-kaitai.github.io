@@ -70,3 +70,9 @@ var t=document.getElementById('toast');function toast(m){t.textContent=m;t.class
 document.getElementById('copy').addEventListener('click',function(){function sel(){var r=document.createRange();r.selectNodeContents(document.getElementById('num'));var s=getSelection();s.removeAllRanges();s.addRange(r);toast('番号を選択しました');}
   try{navigator.clipboard.writeText('090-7686-6461').then(function(){toast('番号をコピーしました')},sel);}catch(e){sel()}});
 })();
+/* 右上のメニュー（ホームページ本体と同じ行き先） */
+(function(){var nav=document.getElementById('rnav'),op=document.getElementById('rnav-open'),cl=document.getElementById('rnav-close');if(!nav||!op||!cl)return;
+function set(o){nav.hidden=!o;op.setAttribute('aria-expanded',String(o));document.documentElement.style.overflow=o?'hidden':'';if(o)cl.focus();else op.focus();}
+op.addEventListener('click',function(){set(true)});cl.addEventListener('click',function(){set(false)});
+nav.addEventListener('click',function(e){if(e.target.closest('a'))set(false)});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!nav.hidden)set(false)});})();
