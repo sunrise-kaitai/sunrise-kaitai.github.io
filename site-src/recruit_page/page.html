@@ -373,8 +373,53 @@ footer .w{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px}
 
 <header class="hd" id="hd"><div class="w">
   <a class="brand" href="/" aria-label="株式会社sunrise トップへ"><b>SUN<i>RISE</i></b><small>DEMOLITION CREW｜採用</small></a>
-  <a class="hd-tel" href="tel:09076866461" aria-label="電話する 090-7686-6461">📞 <span class="en">090-7686-6461</span><span class="sp">電話する</span></a>
+  <div class="hd-r">
+    <a class="hd-tel" href="tel:09076866461" aria-label="電話する 090-7686-6461">📞 <span class="en">090-7686-6461</span><span class="sp">電話する</span></a>
+    <a class="hd-pill" href="/#contact">CONTACT</a>
+    <button class="hd-menu" id="rnav-open" type="button" aria-label="メニューを開く" aria-expanded="false" aria-controls="rnav"><i></i><i></i></button>
+  </div>
 </div></header>
+<nav class="rnav" id="rnav" aria-label="メニュー" hidden>
+  <button class="rnav-close" id="rnav-close" type="button">CLOSE ✕</button>
+  <div class="rnav-list">
+    <a href="/"><span>TOP</span><small>トップページ</small></a>
+    <a href="/#about"><span>ABOUT</span><small>私たちについて</small></a>
+    <a href="/building"><span>BUILDING</span><small>建屋解体</small></a>
+    <a href="/interior"><span>INTERIOR</span><small>内装解体</small></a>
+    <a href="/restore"><span>RESTORE</span><small>原状回復</small></a>
+    <a href="/asbestos"><span>ASBESTOS</span><small>アスベスト調査・除去</small></a>
+    <a href="/area"><span>AREA</span><small>対応エリア</small></a>
+    <a href="/faq"><span>FAQ</span><small>よくあるご質問</small></a>
+    <a href="/column/"><span>COLUMN</span><small>コラム</small></a>
+    <a href="/recruit" aria-current="page"><span>RECRUIT</span><small>採用情報</small></a>
+    <a href="/#contact"><span>CONTACT</span><small>お問い合わせ</small></a>
+  </div>
+</nav>
+<style>
+/* 右上の CONTACT とメニュー（ホームページ本体と同じ並び） */
+.hd-r{display:flex;align-items:center;gap:10px}
+.hd-pill{display:inline-flex;align-items:center;min-height:40px;padding:0 20px;border:1.5px solid var(--ink);border-radius:999px;color:var(--ink);text-decoration:none;font-family:var(--en);letter-spacing:.16em;font-size:14px;background:rgba(10,10,10,.35)}
+.hd-pill:hover{background:var(--ink);color:#111}
+.hd-menu{width:46px;height:46px;display:inline-flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:7px;background:none;border:0;cursor:pointer;padding:0 4px}
+.hd-menu i{display:block;height:2px;background:var(--ink);width:30px}
+.hd-menu i+i{width:20px}
+.rnav{position:fixed;inset:0;z-index:1000;background:#0a0a0a;overflow:auto;padding:84px 24px 40px}
+.rnav[hidden]{display:none}
+.rnav-close{position:absolute;top:18px;right:20px;min-height:44px;padding:0 16px;background:none;border:1.5px solid var(--ink);border-radius:999px;color:var(--ink);font-family:var(--en);letter-spacing:.16em;cursor:pointer}
+.rnav-list{max-width:920px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:4px 32px}
+.rnav-list a{display:flex;align-items:baseline;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none}
+.rnav-list a span{font-family:var(--en);font-size:28px;letter-spacing:.04em}
+.rnav-list a small{color:var(--sub);font-size:13px}
+.rnav-list a:hover span,.rnav-list a[aria-current] span{color:var(--or)}
+@media (max-width:760px){
+  .hd-r{gap:6px}
+  .hd-tel{padding:0 12px;min-height:40px}
+  .hd-pill{min-height:36px;padding:0 12px;font-size:12px;letter-spacing:.1em}
+  .hd-menu{width:40px}
+  .rnav-list a span{font-size:24px}
+}
+@media (max-width:380px){.hd-tel .sp{display:none}}
+</style>
 
 <main id="top">
 <section class="hero" id="hero" aria-labelledby="h1">
