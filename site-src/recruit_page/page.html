@@ -409,6 +409,8 @@ body{background:var(--bg);color:var(--ink)}
 /* 上のバー：写真の上では白文字、スクロール後はホームページと同じ明るいバー */
 .hd.s{background:rgba(246,243,238,.95);border-bottom:1px solid #D8D0C3;--ink:#1A2638;--sub:#6E6A64;color:var(--ink)}
 .hd.s .hd-pill{background:transparent}
+/* 寮の欄：上と同じしま模様を下のふちにも */
+.dorm-stripe-b{position:absolute;left:0;right:0;bottom:0;height:10px;z-index:2;background:repeating-linear-gradient(-45deg,var(--or) 0 16px,#111 16px 32px)}
 </style>
 <style>
 /* 右上の CONTACT とメニュー（ホームページ本体と同じ並び） */
@@ -488,6 +490,7 @@ body{background:var(--bg);color:var(--ink)}
       <div class="plate"><span class="pk en">ANY AGE</span><b>年齢不問</b><span class="ps">何歳からでも、ここがスタート。</span></div>
     </div>
   </div>
+  <span class="dorm-stripe-b" aria-hidden="true"></span>
 </section>
 
 <section class="road" aria-labelledby="h-road"><div class="w">
