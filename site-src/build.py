@@ -5,6 +5,7 @@ Build the sunrise site from src/site.html (single-file source) into:
 """
 import re, json, os, shutil, html
 import extra
+import recruit
 import service_detail   # サービス4ページの詳しい解説（対応物件・費用の要素・近隣対策・トラブル）
 import region           # 地域ページ（あま市・名古屋市・海部津島）
 
@@ -49,6 +50,7 @@ EXTRA = {
                  title='解体工事コラム｜補助金・アスベスト・費用・手続き 株式会社sunrise',
                  desc='解体工事の補助金、アスベスト事前調査、費用が決まるポイント、解体前後の手続き、原状回復とスケルトン工事の違いなど、解体の前に知っておきたいことを愛知県あま市の解体業者が解説します。'),
 }
+EXTRA['recruit'] = dict(file='recruit.html', jp='採用情報', en='Recruit', title=recruit.TITLE, desc=recruit.DESC)
 # 地域ページ：/area-ama など（area.html と同じ名前のフォルダを作らないよう、フォルダにせずファイル名で分ける）
 for _r in region.REGIONS:
     EXTRA['area-' + _r['slug']] = dict(file='area-%s.html' % _r['slug'], jp=_r['jp'], en='Area',
@@ -240,6 +242,8 @@ def body(key):
             main = extra.area_page()
         elif 'reg' in p:
             main = region.page(p['reg'])
+        elif key == 'recruit':
+            main = recruit.page(SRC)
         elif key == 'faq':
             sf = []
             for k in SVC:
@@ -276,7 +280,12 @@ def body(key):
         # 地域ページへのリンク（フッター）
         ft = ft.replace('</nav>\n  </div>', '</nav>\n    <nav class="ft-reg" aria-label="地域別のご案内">'
                         + ''.join(f'<a href="{f}">{t}</a>' for f, t in region.LINK_LABELS) + '</nav>\n  </div>', 1)
+        # 採用：フッターは採用ページへ、トップの採用欄の下に詳細へのリンク
+        ft = ft.replace('<a href="#recruit">Recruit</a>', '<a href="recruit.html">Recruit</a>', 1)
         if is_home:
+            main = re.sub(r'(<section class="svc rec w" id="recruit">.*?)(</section>)',
+                          lambda m: m.group(1) + '<p class="rec-more" style="margin-top:28px"><a class="more" href="recruit.html">採用情報を詳しく見る <i>→</i></a></p>\n' + m.group(2),
+                          main, count=1, flags=re.S)
             main = main.replace('<p class="map-src">', '<p><a class="more" href="area.html">対応市町村を見る <i>→</i></a></p>\n    '
                                 '<p class="map-note map-reg">地域別のご案内：' + '／'.join(f'<a href="{f}">{t}</a>' for f, t in region.LINK_LABELS)
                                 + '</p>\n    <p class="map-src">', 1)
