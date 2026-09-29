@@ -391,6 +391,25 @@ footer .w{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px}
     <a href="/#contact"><span class="n">CONTACT</span><b>CONTACT</b><small>お問い合わせ</small></a>
   </div>
 </nav>
+<style id="theme-light">
+/* 背景をホームページ本体と統一（明るいベージュ＋紺の文字）。
+   写真の上に文字を載せる部分（ヒーロー・夢カード・寮・仕事カード・ロードマップ・ランク・最後の呼びかけ・下部バー・写真拡大）は、
+   読みやすさのため暗い重ねと白い文字のまま（下の「暗い部分」の指定で色を戻している）。 */
+:root{--bg:#F6F3EE;--bg2:#EDE7DE;--ink:#1A2638;--sub:#6E6A64;--line:#D8D0C3;--or2:#B4521A;color-scheme:light}
+body{background:var(--bg);color:var(--ink)}
+.lead{color:#48505C}
+.fq p{color:#48505C}
+.terms .tb{color:var(--ink)}
+.road{background:var(--bg)}
+.hint,.note,.road-note{color:var(--sub)}
+/* 暗い部分（写真の上・ゲーム風の地図など） */
+.hero,.dream,.dorm,.job,.rank,.gmap,.final,.fix,.lb,.strip figcaption,.hd{--ink:#f5f1ea;--sub:#bdb5a8;--line:#2a2724;--bg2:#141414;--or2:#ffa04a;color:var(--ink)}
+.hero .lead,.dorm .lead,.final .lead{color:#e0d9cd}
+.rank,.gmap{background-color:#141414}
+/* 上のバー：写真の上では白文字、スクロール後はホームページと同じ明るいバー */
+.hd.s{background:rgba(246,243,238,.95);border-bottom:1px solid #D8D0C3;--ink:#1A2638;--sub:#6E6A64;color:var(--ink)}
+.hd.s .hd-pill{background:transparent}
+</style>
 <style>
 /* 右上の CONTACT とメニュー（ホームページ本体と同じ並び） */
 .hd-r{display:flex;align-items:center;gap:10px}
