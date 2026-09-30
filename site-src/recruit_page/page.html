@@ -439,13 +439,17 @@ body{background:var(--bg);color:var(--ink)}
 .rnav-list b{font-family:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;font-weight:900;font-size:clamp(28px,min(3.4vw,6.2svh),52px);line-height:.95;letter-spacing:.02em}
 .rnav-list small{font-size:11px;color:#6E6A64;letter-spacing:.2em;line-height:1.5}
 .rnav-list a:hover b,.rnav-list a[aria-current] b{color:#E2702A}
-/* PC：本体と同じく左半分に写真、右半分に項目（余白をなくす） */
+/* PC：本体と同じく左に写真、右に項目（項目の列は文字が収まる幅にして余白をなくす） */
 .rnav-img{display:none}
-@media (min-width:901px){
-  .rnav:not([hidden]){display:grid;grid-template-columns:1fr 1fr}
+@media (min-width:761px){
+  .rnav{--nl:clamp(420px,30vw,560px)}
+  .rnav:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) var(--nl)}
   .rnav-img{display:block;position:relative;min-height:100svh}
   .rnav-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.9}
-  .rnav-list{max-width:none;margin:0;width:100%}
+  .rnav-list{max-width:none;margin:0;width:100%;padding:calc(12px + env(safe-area-inset-top,0px)) clamp(24px,2.6vw,48px) calc(12px + env(safe-area-inset-bottom,0px))}
+  .rnav-list a{grid-template-columns:clamp(88px,6.5vw,116px) minmax(0,1fr)}
+  .rnav-list b{font-size:clamp(40px,min(4.4vw,8.2svh),88px)}
+  .rnav-close{right:calc(var(--nl) + 20px);color:#fff;border-color:rgba(255,255,255,.85);background:rgba(0,0,0,.35)}
 }
 @media (max-width:760px){
   .hd-r{gap:6px}
