@@ -182,7 +182,7 @@ def head(key):
              '<meta property="og:image" content="img/p01.jpg">', '<meta name="twitter:card" content="summary_large_image">',
              '<link rel="icon" href="img/favicon-48.png" sizes="48x48" type="image/png">',
              '<link rel="apple-touch-icon" href="img/apple-touch-icon.png">',
-             '<meta name="theme-color" content="#ff6a1a">']
+             '<meta name="theme-color" content="#17263D">']
     u = url(p['file'])
     if u:
         lines += [f'<link rel="canonical" href="{u}">', f'<meta property="og:url" content="{u}">']
