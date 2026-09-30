@@ -458,6 +458,17 @@ body{background:var(--bg);color:var(--ink)}
   .hd-menu{width:40px}
 }
 @media (max-width:760px){.hd-tel .sp{display:none}.hd-tel{min-width:46px;justify-content:center;font-size:18px}}
+/* RISE ROAD：マップとランクを1枚のパネルに */
+.rcombo{max-width:1000px;margin:22px auto 0;border:1px solid #2e3431;box-shadow:0 18px 40px rgba(0,0,0,.18)}
+.rcombo .gmap{margin-top:0;border:0}
+.rcombo .rank{margin-top:0;border:0;padding:24px clamp(18px,2.6vw,30px) 20px;gap:clamp(14px,2.2vw,28px)}
+.rcombo .rank .big{font-size:clamp(72px,8vw,118px)}
+.rcombo .rank h3{font-size:clamp(28px,3.2vw,42px)}
+.rcombo+.road-note{max-width:1000px;margin-left:auto;margin-right:auto}
+.nw{white-space:nowrap}
+body{line-break:strict}
+@supports not (overflow:clip){html{overflow-x:hidden}}
+@media (max-width:760px){.rcombo{margin-top:16px}.rcombo .gmap{aspect-ratio:400/820}.rcombo .gmap .coord{display:none}.rcombo .rank{padding:22px 16px 18px}.rcombo .rank .big{font-size:76px}.rcombo .rank h3{font-size:30px}}
 </style>
 
 <main id="top">
@@ -472,7 +483,7 @@ body{background:var(--bg);color:var(--ink)}
       <a class="btn p" href="tel:09076866461">📞 電話で話を聞く</a>
       <a class="btn o" href="/#contact" >フォームで問い合わせ</a>
     </div>
-    <p class="micro"><b>まずは電話1本、話を聞くだけでOK。</b>　TEL 090-7686-6461</p>
+    <p class="micro"><b>まずは電話1本、話を聞くだけでOK。</b>　<span class="nw">TEL 090-7686-6461</span></p>
   </div>
   <div class="dots" id="dots" aria-hidden="true"></div>
 </section>
@@ -518,6 +529,7 @@ body{background:var(--bg);color:var(--ink)}
   <p class="lbl">RISE ROAD</p>
   <h2 class="h2" id="h-road">見習いから、<em>親方</em>へ。</h2>
   <p class="lead">ミッションを押して、のし上がれ。<br>解体の腕は、積み上げたぶんだけ一生モノになる。</p>
+  <div class="rcombo">
   <div class="rmap gmap" id="rmap">
     <svg class="gsv d" viewBox="0 0 1000 460" preserveAspectRatio="none" aria-hidden="true">
 <defs><filter id="gl" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
@@ -526,7 +538,7 @@ body{background:var(--bg);color:var(--ink)}
 <rect width="1000" height="460" fill="url(#fog)"/>
 <path d="M70 380 C190 400 170 260 300 270 S470 390 560 280 S700 110 800 150 S880 170 930 150" class="rt-base"/><path id="rp-d" d="M70 380 C190 400 170 260 300 270 S470 390 560 280 S700 110 800 150 S880 170 930 150" class="rt-prog" filter="url(#gl)"/></svg><svg class="gsv m" viewBox="0 0 400 760" preserveAspectRatio="none" aria-hidden="true">
 <g class="grd"><line x1="40" y1="0" x2="40" y2="760"/><line x1="80" y1="0" x2="80" y2="760"/><line x1="120" y1="0" x2="120" y2="760"/><line x1="160" y1="0" x2="160" y2="760"/><line x1="200" y1="0" x2="200" y2="760"/><line x1="240" y1="0" x2="240" y2="760"/><line x1="280" y1="0" x2="280" y2="760"/><line x1="320" y1="0" x2="320" y2="760"/><line x1="360" y1="0" x2="360" y2="760"/><line x1="0" y1="40" x2="400" y2="40"/><line x1="0" y1="80" x2="400" y2="80"/><line x1="0" y1="120" x2="400" y2="120"/><line x1="0" y1="160" x2="400" y2="160"/><line x1="0" y1="200" x2="400" y2="200"/><line x1="0" y1="240" x2="400" y2="240"/><line x1="0" y1="280" x2="400" y2="280"/><line x1="0" y1="320" x2="400" y2="320"/><line x1="0" y1="360" x2="400" y2="360"/><line x1="0" y1="400" x2="400" y2="400"/><line x1="0" y1="440" x2="400" y2="440"/><line x1="0" y1="480" x2="400" y2="480"/><line x1="0" y1="520" x2="400" y2="520"/><line x1="0" y1="560" x2="400" y2="560"/><line x1="0" y1="600" x2="400" y2="600"/><line x1="0" y1="640" x2="400" y2="640"/><line x1="0" y1="680" x2="400" y2="680"/><line x1="0" y1="720" x2="400" y2="720"/></g><g class="topo"><path d="M160,560 154,568 144,574 135,578 125,579 115,580 101,582 89,577 90,567 94,560 92,553 94,545 102,539 113,535 126,536 134,544 139,549 152,552Z"/><path d="M201,560 180,574 161,583 150,595 131,603 108,606 81,605 65,591 69,572 69,560 55,544 60,526 84,518 109,517 131,520 147,528 166,534 193,542Z"/><path d="M228,560 195,578 180,593 172,620 140,636 101,631 69,619 49,600 46,578 30,560 8,533 28,509 73,506 106,506 136,501 168,505 201,515 232,533Z"/><path d="M243,560 216,583 213,612 200,652 147,663 98,643 62,626 28,611 4,588 -21,560 -32,523 11,499 68,500 101,490 144,469 194,474 231,498 253,528Z"/><path d="M267,560 260,594 257,637 223,679 150,675 97,646 51,640 -11,633 -50,601 -63,560 -50,519 4,495 58,488 93,458 155,429 216,449 242,492 260,526Z"/><path d="M306,220 304,231 295,239 278,241 266,241 253,248 234,250 224,240 223,229 222,220 225,212 230,203 236,193 251,186 267,192 276,201 288,204 302,210Z"/><path d="M353,220 337,239 320,253 296,261 273,270 243,284 208,280 197,255 198,235 185,220 179,200 191,181 212,164 244,160 272,173 292,183 326,183 356,197Z"/><path d="M382,220 356,243 348,269 323,292 283,308 234,317 191,300 181,264 169,242 130,220 120,186 154,161 197,147 239,142 278,152 317,155 374,156 406,185Z"/><path d="M395,220 384,250 394,295 357,332 292,340 230,335 181,311 158,277 118,255 59,220 68,174 136,151 189,138 233,120 288,114 349,117 415,133 433,178Z"/><path d="M421,220 440,264 454,328 385,364 295,353 228,341 165,330 112,303 50,271 1,220 46,168 132,148 175,122 222,77 301,65 375,87 433,123 444,175Z"/></g>
-<path d="M60 710 C170 700 170 590 100 545 S50 425 150 400 S180 285 90 250 S70 150 140 125" class="rt-base"/><path id="rp-m" d="M60 710 C170 700 170 590 100 545 S50 425 150 400 S180 285 90 250 S70 150 140 125" class="rt-prog" filter="url(#gl)"/></svg>
+<path d="M60 656 C170 646 170 539 100 495 S50 378 150 353 S180 241 90 207 S70 109 140 85" class="rt-base"/><path id="rp-m" d="M60 656 C170 646 170 539 100 495 S50 378 150 353 S180 241 90 207 S70 109 140 85" class="rt-prog" filter="url(#gl)"/></svg>
     <div class="hud" aria-hidden="true"><span class="pix">MISSION ROUTE ／ RISE ROAD</span><span class="exp"><i id="hud-exp"></i></span><span class="pix" id="hud-st">TIER 1 / 5</span></div>
     <div class="coord pix" aria-hidden="true">BASE ─ AMA CITY　35.18N / 136.79E</div>
     <div class="comp pix" aria-hidden="true">N<i></i></div>
@@ -550,6 +562,7 @@ body{background:var(--bg);color:var(--ink)}
       <div class="segs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
       <div class="nx"><button type="button" id="rk-next">次のランクへ ▶</button><span id="rk-hint">NEXT：職人</span></div>
     </div>
+  </div>
   </div>
   <p class="road-note">※キャリアの流れは一例です。<br>「親方・独立」は目指せる将来像の例で、会社の制度を示すものではありません。</p>
 </div></section>
@@ -603,7 +616,7 @@ body{background:var(--bg);color:var(--ink)}
 </section>
 </main>
 
-<footer><div class="w"><p><a href="/">株式会社sunrise ホームページ</a>／愛知県あま市／TEL 090-7686-6461</p><p>建屋解体・内装解体・原状回復・アスベスト調査／除去</p></div></footer>
+<footer><div class="w"><p><a href="/">株式会社sunrise ホームページ</a>／愛知県あま市／<span class="nw">TEL 090-7686-6461</span></p><p>建屋解体・内装解体・原状回復・アスベスト調査／除去</p></div></footer>
 <nav class="fix" id="fix" aria-label="問い合わせ"><a class="t" href="tel:09076866461" aria-label="電話する 090-7686-6461">📞 <span class="en">090-7686-6461</span></a><a class="f" href="/#contact">CONTACT</a></nav>
 <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="写真の拡大"><button class="x" type="button" id="lbx" aria-label="閉じる">×</button><figure><img id="lbimg" alt=""><p id="lbcap"></p></figure></div>
 <div class="toast" id="toast" role="status"></div>
