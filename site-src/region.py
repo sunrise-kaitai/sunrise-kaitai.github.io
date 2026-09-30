@@ -103,7 +103,8 @@ region('ama', 'AMA', 'あま市の解体工事',
     [('area-nagoya.html', '名古屋市の解体工事｜助成制度と区ごとの届出先'),
      ('area-ama-tsushima.html', '海部・津島エリアの解体工事｜6市町村の補助金と届出先'),
      ('column/subsidy-ama-nagoya.html', 'コラム：あま市・名古屋市・海部津島で使える解体の補助金'),
-     ('column/before-after-demolition.html', 'コラム：解体工事の前後にやることリスト')])
+     ('column/before-after-demolition.html', 'コラム：解体工事の前後にやることリスト'),
+     ('column/akiya-tax-demolition.html', 'コラム：空き家を解体する前に知りたい固定資産税と空家法')])
 
 # ---------------------------------------------------------------- 名古屋市
 NGY_SRC = [
@@ -214,7 +215,8 @@ region('ama-tsushima', 'AMA-<br>TSUSHIMA', '海部・津島エリアの解体工
     [('area-ama.html', 'あま市の解体工事｜補助金3制度と届出先'),
      ('area-nagoya.html', '名古屋市の解体工事｜助成制度と区ごとの届出先'),
      ('column/subsidy-ama-nagoya.html', 'コラム：あま市・名古屋市・海部津島で使える解体の補助金'),
-     ('column/demolition-cost-factors.html', 'コラム：解体費用はどう決まる？')])
+     ('column/demolition-cost-factors.html', 'コラム：解体費用はどう決まる？'),
+     ('column/akiya-tax-demolition.html', 'コラム：空き家を解体する前に知りたい固定資産税と空家法')])
 
 # 対応エリアページ・トップ・フッターで使うリンク
 LINK_LABELS = [('area-ama.html', 'あま市の解体工事'), ('area-nagoya.html', '名古屋市の解体工事'),
