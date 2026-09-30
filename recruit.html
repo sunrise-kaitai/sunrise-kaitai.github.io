@@ -76,6 +76,7 @@ section{padding-block:clamp(24px,3vw,40px)}
 .shake{animation:shake .45s cubic-bezier(.3,.1,.2,1)}
 @keyframes shake{10%,50%{transform:translate(-4px,2px)}30%,70%{transform:translate(4px,-2px)}90%{transform:translate(-2px,1px)}}
 .rot{margin-top:18px;font-weight:900;font-size:clamp(20px,3.2vw,34px);min-height:1.4em;display:flex;align-items:center;gap:12px}
+#rot:empty::before{content:"\200b"}
 .rot .bar{width:10px;height:1.1em;background:var(--or);animation:blink 1s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
 .cta{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:26px}
@@ -623,6 +624,6 @@ body{line-break:strict}
 <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="写真の拡大"><button class="x" type="button" id="lbx" aria-label="閉じる">×</button><figure><img id="lbimg" alt=""><p id="lbcap"></p></figure></div>
 <div class="toast" id="toast" role="status"></div>
 
-<script src="/assets/recruit.js?v=62c6a7f0b5" defer></script>
+<script src="/assets/recruit.js?v=6291ab0c80" defer></script>
 </body>
 </html>
