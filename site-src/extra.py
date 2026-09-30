@@ -437,4 +437,32 @@ EXTRA_CSS = r'''
 .nav-list b{font-size:clamp(40px,min(4.4vw,8.2svh),88px)!important}
 .nav-close{right:calc(var(--nl) + 20px)!important;color:#fff!important;border-color:rgba(255,255,255,.85)!important;background:rgba(0,0,0,.35)!important}
 }
+
+/* ===== 全体の色：紺 → 採用ページと同じオレンジ（#ff6a1a）===== */
+/* 紺だった背景はオレンジに（上の文字は黒）。写真の下地だけは黒 */
+.mv{background:#ff6a1a!important}
+.mv-pick{background:rgba(255,106,26,.94)!important}
+.mv-pick span{color:#111!important}
+.mv-pick button{color:#111!important;border-color:rgba(0,0,0,.35)!important}
+.mv-pick button[aria-pressed="true"]{background:#111!important;border-color:#111!important;color:#fff!important}
+.rec{background:linear-gradient(180deg,#ff6a1a 0%,#F7621A 60%,#EC5A18 100%)!important;--ink:#111;--line:rgba(0,0,0,.22);--dim:#3B2412;--body:#2A1A0E;--sun-d:#111;--sun:#111}
+.rec::after{background:radial-gradient(circle,rgba(255,209,102,.45),rgba(255,209,102,.1) 45%,transparent 70%)!important}
+.ft{background:#ff6a1a!important;--ink:#111;--line:rgba(0,0,0,.2);--dim:#3B2412;--sun:#111}
+.ft .bigslide .track span{-webkit-text-stroke:1px rgba(0,0,0,.4)!important}
+.ft .bigslide .track span::after{background:rgba(0,0,0,.4)!important}
+.pg-cta{background:#ff6a1a!important;color:#111!important}
+.pg-cta .mono{color:#111!important}
+.pg-cta p{color:#2A1A0E!important}
+.pg-cta .send{background:#111!important;color:#fff!important;border-color:#111!important}
+.cta-bar{background:#ff6a1a!important}
+.cta-bar .cta-tel{background:#ff6a1a!important;color:#111!important}
+.cta-bar .cta-est{border-left:1px solid rgba(0,0,0,.25)}
+/* 大きな見出しはオレンジ（本文は濃い色のまま） */
+.svc-hd h2,.svc-name,.pg-title,.pg-sec-hd h2,.sv-index-hd h2,.co h2,.ab-title,.map-h,.cw,.label,.ct-big,.sv-card h3,.a-en,.split,.sv-other b{color:#ff6a1a}
+/* オレンジの背景の中の見出しは黒 */
+.rec .svc-hd h2,.rec h2,.rec h3,.ft .ct-big,.pg-cta h2{color:#111!important}
+.hd.on-or{mix-blend-mode:normal!important;color:#111!important}
+.hd.on-or img{filter:brightness(0)!important}
+.hd.on-or .pill,.hd.on-or .hd-cta{border-color:#111!important;color:#111!important}
+.rec .job{background:rgba(255,236,220,.22)!important;border-color:rgba(0,0,0,.25)!important}
 '''
