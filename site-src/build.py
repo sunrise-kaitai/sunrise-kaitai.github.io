@@ -119,7 +119,7 @@ ORG = {
   "alternateName": "sunrise",
   "description": "愛知県あま市の解体工事会社。建屋解体・内装解体・原状回復・アスベスト調査・除去。",
   "telephone": "+81-90-7686-6461",
-  "address": {"@type": "PostalAddress", "addressRegion": "愛知県", "addressLocality": "あま市", "addressCountry": "JP"},
+  "address": {"@type": "PostalAddress", "addressRegion": "愛知県", "addressLocality": "あま市", "streetAddress": "甚目寺五位田98", "addressCountry": "JP"},
   "areaServed": [{"@type": "AdministrativeArea", "name": a} for a in AREA],
   "founder": {"@type": "Person", "name": "松浦 恒裕"},
   "makesOffer": [{"@type": "Offer", "itemOffered": {"@type": "Service", "name": n}} for n in ['建屋解体', '内装解体', '原状回復', 'アスベスト調査・除去']],
