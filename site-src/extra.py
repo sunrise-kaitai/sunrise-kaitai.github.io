@@ -428,4 +428,13 @@ EXTRA_CSS = r'''
 .ft-reg{flex-basis:100%;display:flex;gap:8px 20px;flex-wrap:wrap}
 @media (max-width:960px){.col-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:560px){.col-grid{grid-template-columns:1fr}.art th{white-space:normal;width:34%}}
+
+/* メニュー（PC）：右側の余白をなくす。項目の列を文字が収まる幅に細くし、写真を広く、文字を大きく上下いっぱいに。CLOSE は写真の右上に重ねる */
+@media (min-width:761px){
+.nav{--nl:clamp(420px,30vw,560px);grid-template-columns:minmax(0,1fr) var(--nl)!important}
+.nav-list{padding:calc(12px + env(safe-area-inset-top,0px)) clamp(24px,2.6vw,48px) calc(12px + env(safe-area-inset-bottom,0px))!important}
+.nav-list a{grid-template-columns:clamp(88px,6.5vw,116px) minmax(0,1fr)!important}
+.nav-list b{font-size:clamp(40px,min(4.4vw,8.2svh),88px)!important}
+.nav-close{right:calc(var(--nl) + 20px)!important;color:#fff!important;border-color:rgba(255,255,255,.85)!important;background:rgba(0,0,0,.35)!important}
+}
 '''
