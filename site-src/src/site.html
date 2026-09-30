@@ -1366,7 +1366,7 @@ function startCycle(){
   const mv=document.querySelector('.mv'),cv=document.getElementById('cover');
   if(reduce){mv.classList.add('show');cv.remove();startCycle();return}
   const x=cv.getContext('2d'),m=document.createElement('canvas'),mx=m.getContext('2d');
-  const BG='#ff6a1a',S=5;
+  const BG='#17263D',S=5;
   const JP='壊すことから、次の朝をつくる職人たちがいる。',EN='CRAFTSMEN WHO CLEAR THE GROUND FOR THE NEXT MORNING OF THE CITY.';
   const POOL_JP=[...'解体更地朝職人壊次街重機養生分別基礎梁柱瓦壁床天井'],POOL_EN=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ#/\\_-=+*'];
   let W,H,dpr,mw,mh,noise,lines=[],logo,img,start=0,done=false;
@@ -1387,7 +1387,7 @@ function startCycle(){
     const jpL=narrow?['壊すことから、','次の朝をつくる職人たちがいる。']:[JP];
     const enL=narrow?['CRAFTSMEN WHO CLEAR THE GROUND','FOR THE NEXT MORNING OF THE CITY.']:[EN];
     const jf=`700 ${js}px "Shippori Mincho B1","Hiragino Mincho ProN",serif`,ef=`500 ${es}px "Big Shoulders Display","Arial Narrow",sans-serif`;
-    const rows=[...jpL.map(t=>({t,f:jf,sz:js,lh:js*1.75,col:'#111111',pool:POOL_JP,ls:js*.12,d:0})),{gap:js*.9},...enL.map(t=>({t,f:ef,sz:es,lh:es*1.9,col:'#3B2412',pool:POOL_EN,ls:es*.28,d:.15}))];
+    const rows=[...jpL.map(t=>({t,f:jf,sz:js,lh:js*1.75,col:'#EDE7DB',pool:POOL_JP,ls:js*.12,d:0})),{gap:js*.9},...enL.map(t=>({t,f:ef,sz:es,lh:es*1.9,col:'#A9B3C2',pool:POOL_EN,ls:es*.28,d:.15}))];
     const total=rows.reduce((a,r)=>a+(r.gap||r.lh),0);let y=H*.47-total/2;lines=[];
     x.setTransform(1,0,0,1,0,0);
     rows.forEach(r=>{if(r.gap){y+=r.gap;return}x.font=r.f;const ch=[...r.t],ws=ch.map(c=>x.measureText(c).width+r.ls),tw=ws.reduce((a,b)=>a+b,0)-r.ls;
@@ -1515,14 +1515,5 @@ const FORM_ENDPOINT='https://script.google.com/macros/s/AKfycbzMB2zlNcDNW7qnFhyj
     const el=document.getElementById(h);if(el)requestAnimationFrame(()=>el.scrollIntoView());
   }
   addEventListener('hashchange',route);route();
-})();
-/* ---------- header on orange sections: the white "difference" blend turns blue there, so switch to plain dark ---------- */
-(function(){
-  const hd=document.querySelector('.hd');if(!hd)return;
-  const upd=()=>{const y=hd.getBoundingClientRect().height/2;let on=false;
-    document.querySelectorAll('.rec,.ft,.pg-cta,.mv').forEach(e=>{if(e.classList.contains('mv')&&!document.getElementById('cover'))return;
-      const r=e.getBoundingClientRect();if(r.top<=y&&r.bottom>=y)on=true});
-    hd.classList.toggle('on-or',on)};
-  addEventListener('scroll',upd,{passive:true});addEventListener('resize',upd);setInterval(upd,500);upd();
 })();
 </script>
