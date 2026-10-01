@@ -415,11 +415,22 @@ robots = 'User-agent: *\nAllow: /\n' + (f'Sitemap: {DOMAIN.rstrip("/")}/sitemap.
 open('dist/robots.txt', 'w').write(robots)
 if DOMAIN:
     import datetime
-    today = datetime.date.today().isoformat()
+    today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date().isoformat()   # 日本時間
+    # lastmod は「中身が変わったページ」だけ今日の日付にする。公開中（リポジトリ直下）のページと
+    # 同じ内容なら、前回のサイトマップの日付をそのまま使う（毎回全ページが更新扱いになるのを防ぐ）。
+    old_lm = {}
+    if os.path.exists('../sitemap.xml'):
+        old_lm = dict(re.findall(r'<loc>([^<]+)</loc><lastmod>([^<]+)</lastmod>', open('../sitemap.xml', encoding='utf-8').read()))
+    def lastmod(f):
+        new_f, pub_f, u = 'dist/' + out_file(f), '../' + out_file(f), url(f)
+        if u in old_lm and os.path.exists(new_f) and os.path.exists(pub_f) \
+                and open(new_f, 'rb').read() == open(pub_f, 'rb').read():
+            return old_lm[u]
+        return today
     sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     for key, p in list(PAGES.items()) + list(EXTRA.items()):
         pr = '1.0' if key == 'index' else ('0.8' if key in SVC else ('0.7' if (key in ('area', 'faq', 'column') or key.startswith('area-')) else '0.6'))
-        sm += f'  <url><loc>{url(p["file"])}</loc><lastmod>{today}</lastmod><priority>{pr}</priority></url>\n'
+        sm += f'  <url><loc>{url(p["file"])}</loc><lastmod>{lastmod(p["file"])}</lastmod><priority>{pr}</priority></url>\n'
     sm += '</urlset>\n'
     open('dist/sitemap.xml', 'w').write(sm)
 print('built', sorted(os.listdir('dist')), sorted(os.listdir('dist/column')))
