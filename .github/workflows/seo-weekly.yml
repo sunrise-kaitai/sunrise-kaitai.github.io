@@ -1,9 +1,9 @@
-name: 週次SEOチェック（毎週月曜）
+name: 毎日のSEOチェックと報告
 # Google の Lighthouse で主要ページを採点する。GitHub の無料枠で動き、Claude のクレジットは使わない。
-# 毎週「週次レポート」を Issue として作り、GitHub からメールで届く（リポジトリを Watch → All Activity にしておく）。
+# 毎日「毎日のレポート」を Issue として作り、GitHub からメールで届く（リポジトリを Watch → All Activity にしておく）。
 on:
   schedule:
-    - cron: '43 23 * * 0'   # 日本時間 月曜 8:43
+    - cron: '43 23 * * *'   # 日本時間 毎朝 8:43（混雑時は遅れることがある）
   workflow_dispatch:
 permissions:
   contents: read
