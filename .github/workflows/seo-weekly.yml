@@ -1,6 +1,6 @@
 name: 週次SEOチェック（毎週月曜）
 # Google の Lighthouse で主要ページを採点する。GitHub の無料枠で動き、Claude のクレジットは使わない。
-# 問題があれば Issue「週次チェック: 改善が必要」が立ち、GitHub からメールで届く。
+# 毎週「週次レポート」を Issue として作り、GitHub からメールで届く（リポジトリを Watch → All Activity にしておく）。
 on:
   schedule:
     - cron: '43 23 * * 0'   # 日本時間 月曜 8:43
@@ -8,6 +8,7 @@ on:
 permissions:
   contents: read
   issues: write
+  actions: read
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
