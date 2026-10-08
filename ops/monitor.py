@@ -5,7 +5,7 @@
   - SEOの基本（タイトル・説明文・canonical・h1・構造化データ・noindex の混入）が崩れていないか
   - 旧アドレス（Cloudflare）からの転送状況（参考情報。失敗扱いにはしない）
 問題があれば GitHub の Issue「サイト監視: 異常あり」を作成/更新し、直ったら自動で閉じる。
-毎朝の SEO チェックはこの Issue を見て、最優先で原因を直す。
+Issue が立つと GitHub からメールで届く（Claude のクレジットは使わない）。
 """
 import os, re, sys, json, time, html, urllib.request, urllib.error
 from urllib.parse import urljoin, urlparse

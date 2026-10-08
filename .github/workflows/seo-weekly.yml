@@ -1,0 +1,34 @@
+name: 週次SEOチェック（毎週月曜）
+# Google の Lighthouse で主要ページを採点する。GitHub の無料枠で動き、Claude のクレジットは使わない。
+# 問題があれば Issue「週次チェック: 改善が必要」が立ち、GitHub からメールで届く。
+on:
+  schedule:
+    - cron: '43 23 * * 0'   # 日本時間 月曜 8:43
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: 主要ページを採点
+        run: |
+          mkdir -p lh
+          SITE=$(python3 -c "import re;print(re.search(r\"^DOMAIN = '([^']*)'\", open('site-src/build.py',encoding='utf-8').read(), re.M).group(1).rstrip('/'))")
+          i=0
+          for p in / /building /interior /restore /asbestos /area-ama /area-nagoya /column/; do
+            i=$((i+1))
+            npx -y lighthouse@12 "$SITE$p" --quiet --output=json --output-path="lh/$i.json" \
+              --chrome-flags="--headless=new --no-sandbox" \
+              --only-categories=seo,performance,accessibility,best-practices || echo "失敗: $p"
+          done
+      - name: 結果をまとめて知らせる
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 ops/lighthouse.py
