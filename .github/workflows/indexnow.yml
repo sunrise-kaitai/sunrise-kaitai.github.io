@@ -1,0 +1,39 @@
+name: 検索エンジンへ更新を通知（IndexNow）
+# ページを公開・更新したときに、Bing など IndexNow 対応の検索エンジンへ全ページのURLを自動で知らせる。
+# Google は Search Console に登録済みのサイトマップを自動で読みに来るので、別の作業は不要。
+# GitHub の無料枠で動き、Claude のクレジットは使わない。
+on:
+  push:
+    branches: [main]
+    paths: ['sitemap.xml', '*.html', 'column/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: 公開の反映を待つ
+        run: sleep 180
+      - name: IndexNow に送信
+        run: |
+          python3 - <<'PY'
+          import re, json, urllib.request
+          from urllib.parse import urlparse
+          src = open('site-src/build.py', encoding='utf-8').read()
+          site = re.search(r"^DOMAIN = '([^']*)'", src, re.M).group(1).rstrip('/')
+          key = re.search(r"^INDEXNOW_KEY = '([^']*)'", src, re.M).group(1)
+          urls = re.findall(r'<loc>(.*?)</loc>', open('sitemap.xml', encoding='utf-8').read())
+          body = {'host': urlparse(site).netloc, 'key': key,
+                  'keyLocation': f'{site}/{key}.txt', 'urlList': urls}
+          req = urllib.request.Request('https://api.indexnow.org/indexnow', data=json.dumps(body).encode(),
+                                       headers={'Content-Type': 'application/json; charset=utf-8'})
+          try:
+              with urllib.request.urlopen(req, timeout=30) as r:
+                  print('送信しました:', r.status, f'{len(urls)}ページ')
+          except urllib.error.HTTPError as e:
+              print('送信に失敗:', e.code, e.read()[:300])
+              raise SystemExit(1)
+          PY

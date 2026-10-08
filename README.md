@@ -13,6 +13,10 @@
 | `ops/seo-log.md` | 毎日のSEOチェックの記録 |
 | `ops/owner-tasks.md` | 松浦様にお願いしたい作業（Search Console・転送・Googleビジネスプロフィール・独自ドメイン・口コミ）の手順と文面 |
 | `ops/monitor.py`, `.github/workflows/site-monitor.yml` | 公開サイトの自動監視（5分ごと）。異常があると Issue「サイト監視: 異常あり」が立ち、直ると自動で閉じる |
+| `ops/lighthouse.py`, `.github/workflows/seo-weekly.yml` | 毎週月曜の SEO・表示速度の採点（Google Lighthouse）。SEO 90点未満・表示速度50点未満があると Issue「週次チェック: 改善が必要」 |
+| `.github/workflows/indexnow.yml` | 公開のたびに Bing など IndexNow 対応の検索エンジンへ全ページを自動通知（キーは `build.py` の `INDEXNOW_KEY`、公開してよい値） |
+
+自動チェックはすべて GitHub の無料枠で動き、Claude のクレジットは使いません（2026/10/8 に Claude の毎日チェックは停止）。
 
 ## 更新のしかた
 

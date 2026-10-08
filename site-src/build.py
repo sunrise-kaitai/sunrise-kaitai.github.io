@@ -402,6 +402,9 @@ write('dist/404.html', clean_links(nf))
 write('dist/.nojekyll', '')
 for _f in GSC_FILES:
     write('dist/' + _f, 'google-site-verification: ' + _f + '\n')
+# IndexNow（Bing・Yandex などに新しいページを自動で知らせる仕組み）の確認用キー。公開してよい値。
+INDEXNOW_KEY = '21d1c8dc4d9cecd7eaa2198b35890065'
+write('dist/' + INDEXNOW_KEY + '.txt', INDEXNOW_KEY + '\n')
 # 独自ドメイン（例: https://sunrise-kaitai.jp）にしたときは GitHub Pages 用の CNAME を自動で置く
 if DOMAIN and not urlparse(DOMAIN).netloc.endswith('github.io'):
     write('dist/CNAME', urlparse(DOMAIN).netloc + '\n')
