@@ -8,7 +8,7 @@ const PHOTOS = {
   excavator:[1,4,7,9,10], dawn:[9,1,10,4,7], debris:[1,7,4,10,9], stripes:[10,4,1],
   interior:[2,3,5,6,8], concrete:[6,5,8,3], rebar:[5,8,6], restore:[6,8,5,3]
 };
-const photo=n=>`/img/p${String(n).padStart(2,'0')}.webp`;
+const photo=n=>`/img/p${String(n).padStart(2,'0')}${innerWidth<=760?'-960':''}.webp`;
 
 document.documentElement.classList.add('js');
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
