@@ -94,22 +94,83 @@ if token and repo:
     except Exception as e:
         print('Issue の更新に失敗:', e)
 
+# ---- サイトの変更（公開した内容・ページ数の変化）を git の履歴から集める ----
+import subprocess
+def git(*a):
+    try:
+        return subprocess.run(['git', *a], capture_output=True, text=True, timeout=30).stdout
+    except Exception:
+        return ''
+def sitemap_at(rev):
+    x = git('show', f'{rev}:sitemap.xml') if rev else ''
+    return dict(re.findall(r'<loc>(.*?)</loc>\s*<lastmod>(.*?)</lastmod>', x))
+def page_names(urls):
+    # URL → ページのタイトル（なければURLの末尾）
+    out = []
+    for u in sorted(urls):
+        path = u.replace(SITE, '').strip('/') or 'index'
+        f = path + '.html' if os.path.exists(path + '.html') else os.path.join(path, 'index.html')
+        t = re.search(r'<title>(.*?)[｜|]', open(f, encoding='utf-8').read()) if os.path.exists(f) else None
+        out.append(t.group(1).strip() if t else '/' + path)
+    return out
+def changes(hours):
+    since = f'{hours} hours ago'
+    base = git('rev-list', '-1', f'--before={since}', 'HEAD').strip()
+    now, then = sitemap_at('HEAD'), sitemap_at(base)
+    added = set(now) - set(then)
+    updated = {u for u in now if u in then and now[u] != then[u]}
+    titles = []
+    for line in git('log', f'--since={since}', '--first-parent', '--format=%s%x1f%b%x1e', 'HEAD').split('\x1e'):
+        if not line.strip():
+            continue
+        subj, _, body = line.strip().partition('\x1f')
+        t = body.strip().splitlines()[0] if subj.startswith('Merge pull request') and body.strip() else subj
+        titles.append(t.strip())
+    return {'now': len(now), 'then': len(then) if base else None, 'added': page_names(added),
+            'updated': page_names(updated), 'titles': titles}
+
 # ---- LINE で知らせる ----
 # GitHub の Secrets に LINE_CHANNEL_ACCESS_TOKEN（LINE公式アカウントのチャネルアクセストークン）と
 # LINE_TO（受け取る人のユーザーID。U から始まる文字列）が登録されているときだけ送る。
 # 値はファイルに書かない（README のセキュリティのルール）。無料プランは月200通まで。
 line_token, line_to = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN'), os.environ.get('LINE_TO')
 if line_token and line_to:
-    jst = time.strftime('%m/%d', time.gmtime(time.time() + 9 * 3600))
+    now_jst = time.gmtime(time.time() + 9 * 3600)
+    monday = now_jst.tm_wday == 0
+    jst = time.strftime('%m/%d', now_jst)
     seo = [sc.get('seo', 0) for _, sc in rows]
     perf = [sc.get('performance', 0) for _, sc in rows]
-    msg = [f'【ホームページ 毎日のレポート {jst}】',
-           '結果: ' + ('要確認' if problems else '問題なし'),
-           f'SEO: {min(seo)}〜{max(seo)}点（{len(rows)}ページ）' if rows else 'SEO: 採点できず',
-           f'表示速度: {min(perf)}〜{max(perf)}点' if rows else '']
-    msg += [m.lstrip('- ') for m in monitor]
+    mon = [m.lstrip('- ') for m in monitor]
+    d = changes(24)
+    msg = [f'【sunrise SEO 毎日チェック {jst}】', '',
+           '■ 結果: ' + ('要確認' if problems else '問題なし')]
+    msg += ['', '■ 監視'] + ['・' + m for m in mon]
+    msg += ['', '■ サイトの変更（直近24時間）']
+    if d['titles']:
+        msg += ['・公開: ' + t for t in d['titles'][:5]]
+    else:
+        msg += ['・今日はサイトの変更なし']
+    if d['added']:
+        msg += ['・新しいページ: ' + '、'.join(d['added'][:5])]
+    if d['updated']:
+        msg += ['・更新したページ: ' + '、'.join(d['updated'][:5])]
+    if d['then'] is not None:
+        diff = d['now'] - d['then']
+        msg += [f'・ページ数: {d["now"]}ページ（前日比 ' + (f'+{diff}' if diff > 0 else str(diff) if diff else '変化なし') + '）']
+    msg += ['', '■ 点数（スマホ・100点満点）']
+    msg += ([f'・SEO: {min(seo)}〜{max(seo)}点（{len(rows)}ページ）' if min(seo) != max(seo) else f'・SEO: {seo[0]}点（{len(rows)}ページ）',
+             f'・表示速度: {min(perf)}〜{max(perf)}点'] if rows else ['・採点できませんでした'])
     if problems:
-        msg += ['', '改善が必要なところ:'] + [p.replace(SITE, '/') for p in problems[:5]]
+        msg += ['', '■ 改善が必要なところ'] + ['・' + p.replace(SITE, '/') for p in problems[:5]]
+    if monday:
+        w = changes(24 * 7)
+        msg += ['', '■ 週のまとめ（直近7日）']
+        msg += (['・公開: ' + t for t in w['titles'][:8]] or ['・公開した変更なし'])
+        if w['then'] is not None:
+            msg += [f'・ページ数: {w["then"]} → {w["now"]}ページ']
+        if w['added']:
+            msg += ['・新しいページ: ' + '、'.join(w['added'][:8])]
+    msg += ['', '※ 検索の表示回数・順位は Google Search Console で確認できます。']
     if report_url:
         msg += ['', '詳しくはこちら:', report_url]
     text = '\n'.join(x for x in msg if x is not None)[:4900]
