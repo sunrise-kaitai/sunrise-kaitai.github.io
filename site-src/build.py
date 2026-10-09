@@ -119,7 +119,7 @@ ORG = {
   "alternateName": "sunrise",
   "description": "愛知県あま市の解体工事会社。建屋解体・内装解体・原状回復・アスベスト調査・除去。",
   "telephone": "+81-90-7686-6461",
-  "address": {"@type": "PostalAddress", "addressRegion": "愛知県", "addressLocality": "あま市", "streetAddress": "甚目寺五位田98", "addressCountry": "JP"},
+  "address": {"@type": "PostalAddress", "postalCode": "490-1111", "addressRegion": "愛知県", "addressLocality": "あま市", "streetAddress": "甚目寺五位田98", "addressCountry": "JP"},
   "areaServed": [{"@type": "AdministrativeArea", "name": a} for a in AREA],
   "founder": {"@type": "Person", "name": "松浦 恒裕"},
   "makesOffer": [{"@type": "Offer", "itemOffered": {"@type": "Service", "name": n}} for n in ['建屋解体', '内装解体', '原状回復', 'アスベスト調査・除去']],
@@ -303,7 +303,7 @@ def body(key):
 # 新しく外部サービス（地図・動画・解析タグなど）を使うときは、ここに許可先を足さないとブロックされる。
 CSP = ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
        "font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; "
-       "connect-src https://script.google.com https://script.googleusercontent.com; form-action 'self'; "
+       "connect-src 'self' https://script.google.com https://script.googleusercontent.com; form-action 'self'; "
        "base-uri 'self'; object-src 'none'; frame-src 'none'; upgrade-insecure-requests")
 SECURITY_META = (f'<meta http-equiv="Content-Security-Policy" content="{CSP}">\n'
                  '<meta name="referrer" content="strict-origin-when-cross-origin">\n')
@@ -318,6 +318,33 @@ def preview_index():
     return head('index') + '\n' + body('index') + '\n'
 
 # ---------- write ----------
+# ---------- 表示速度: 写真に縮小版の候補（srcset）を付け、画面に合う大きさだけ読み込ませる ----------
+def responsive(h):
+    def set_for(name):
+        # 候補ごとの実際の横幅（縦長の写真は元が1050pxなど）を書く
+        ws = [(f'{name}-{w}', Image.open(f'img_web/{name}-{w}.webp').width) for w in RESP_W]
+        ws.append((name, Image.open(f'img_opt/{name}.jpg').width))
+        return ', '.join(f'{BASE}/img/{f}.webp {w}w' for f, w in ws)
+    def img_rep(m):
+        tag = m.group(0)
+        mm = re.search(r' src="' + re.escape(BASE) + r'/img/(p\d+)\.(?:webp|jpg)"', tag)
+        if not mm or 'srcset=' in tag:
+            return tag
+        name = mm.group(1)
+        tag = tag.replace(mm.group(0), f' src="{BASE}/img/{name}.webp"', 1)
+        return tag[:-1].rstrip('/') + f' srcset="{set_for(name)}" sizes="(max-width:1024px) 100vw, 50vw">'
+    h = re.sub(r'<img\b[^>]*>', img_rep, h)
+    # トップの大きな写真（最初に見える写真）: スマホ用 source にも候補を付ける
+    # （fetchpriority=high は CSS・フォントの読み込みと競合して逆に遅くなったので付けない）
+    h = re.sub(r'<source media="\(max-width:700px\)" srcset="' + re.escape(BASE) + r'/img/(p\d+)\.webp">',
+               lambda m: f'<source media="(max-width:700px)" srcset="{set_for(m.group(1))}" sizes="100vw">', h)
+    h = h.replace('<div class="mv-slide-img on"><picture>', '<div class="mv-slide-img on"><picture data-lcp>', 1)
+    h = re.sub(r'(<picture data-lcp>.*?<img\b[^>]*?sizes=")[^"]*"', lambda m: m.group(1) + '100vw"', h, count=1, flags=re.S)   # トップ写真は横幅いっぱい
+    h = h.replace('<picture data-lcp>', '<picture>', 1)
+    # フッターのロゴは画面の下なので後から読む
+    h = h.replace('<img src="' + BASE + '/img/logo-ink.png" alt="sunrise" style=', '<img src="' + BASE + '/img/logo-ink.png" alt="sunrise" loading="lazy" decoding="async" style=')
+    return h
+
 # ---------- image assets ----------
 from PIL import Image
 os.makedirs('img_web', exist_ok=True)
@@ -326,6 +353,14 @@ for f in sorted(os.listdir('img_opt')):
         w = 'img_web/' + f[:-4] + '.webp'
         if not os.path.exists(w):
             Image.open('img_opt/' + f).save(w, 'WEBP', quality=74, method=6)
+# 表示速度のため、スマホ・小さい枠用の縮小版（横640px・960px）も作る（img_web/p01-640.webp など）
+RESP_W = [640, 960]
+for f in sorted(os.listdir('img_opt')):
+    if f.endswith('.jpg'):
+        for w_ in RESP_W:
+            out_ = 'img_web/%s-%d.webp' % (f[:-4], w_)
+            if not os.path.exists(out_):
+                im = Image.open('img_opt/' + f); im.thumbnail((w_, w_ * 4)); im.save(out_, 'WEBP', quality=72, method=6)
 for f in ['logo-white.png', 'logo-ink.png']:
     im = Image.open('img/' + f); im.thumbnail((460, 460)); im.save('img_web/' + f, optimize=True)
 if not os.path.exists('img_web/apple-touch-icon.png'):
@@ -352,6 +387,9 @@ for out in ['dist', 'preview']:
     j = JS_BASE
     if is_dist:
         j = j.replace("`img/p${String(n).padStart(2,'0')}.jpg`", "`%s/img/p${String(n).padStart(2,'0')}.%s`" % (BASE, IMG_EXT))
+        if not COMPAT:   # スマホ（横760px以下）では縮小版（960px）を使う
+            j = j.replace("`%s/img/p${String(n).padStart(2,'0')}.%s`" % (BASE, IMG_EXT),
+                          "`%s/img/p${String(n).padStart(2,'0')}${innerWidth<=760?'-960':''}.%s`" % (BASE, IMG_EXT))
         j = j.replace("LOGO.src='img/logo-ink.png'", "LOGO.src='%s/img/logo-ink.png'" % BASE)
         assert BASE + '/img/p$' in j and "'%s/img/logo-ink.png'" % BASE in j
     open(out + '/assets/main.js', 'w', encoding='utf-8').write(j.strip() + '\n')
@@ -372,6 +410,8 @@ for out in ['dist', 'preview']:
             doc = doc.replace('</head>', faq_ld(body(key)) + '\n</head>', 1)
         if is_dist:
             doc = clean_links(doc)
+            if not COMPAT:
+                doc = responsive(doc)
         write(f'{out}/{out_file(p["file"]) if is_dist else p["file"]}', doc)
 
 
