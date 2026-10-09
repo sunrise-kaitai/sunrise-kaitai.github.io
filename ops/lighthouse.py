@@ -5,7 +5,7 @@ SEO が 90 点未満・表示速度が 50 点未満のページがあれば Issu
 問題がなくなれば自動で閉じる。
 問題の有無にかかわらず、毎日「毎日のレポート」を Issue として作る（リポジトリを Watch しているとメールで届く）。結果は毎回 Actions の「Summary」に表として残る。
 """
-import os, re, sys, json, glob, time, urllib.request
+import os, re, sys, json, glob, time, urllib.request, urllib.error
 
 _here = os.path.dirname(os.path.abspath(__file__))
 SITE = re.search(r"^DOMAIN = '([^']*)'", open(os.path.join(_here, '..', 'site-src', 'build.py'), encoding='utf-8').read(), re.M).group(1).rstrip('/') + '/'
@@ -74,6 +74,7 @@ if os.environ.get('GITHUB_STEP_SUMMARY'):
     open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8').write(report + '\n')
 
 TITLE = '週次チェック: 改善が必要'  # 既存の Issue 名を引き継ぐ
+report_url = ''
 if token and repo:
     try:
         # 毎日のレポート（問題がなくても必ず作る → GitHub からメールで届く。読み終わりの扱いにするため作成後すぐ閉じる）
@@ -81,6 +82,7 @@ if token and repo:
         rep = api('POST', '/issues', {'title': f'毎日のレポート {time.strftime("%Y/%m/%d", time.gmtime(time.time() + 9 * 3600))}（{status}）',
                                        'labels': ['daily-report'], 'body': report})
         api('PATCH', f'/issues/{rep["number"]}', {'state': 'closed', 'state_reason': 'completed'})
+        report_url = rep.get('html_url', '')
         opened = [i for i in api('GET', '/issues?state=open&labels=seo-weekly&per_page=10') if i['title'] == TITLE]
         if problems and not opened:
             api('POST', '/issues', {'title': TITLE, 'labels': ['seo-weekly'], 'body': report})
@@ -91,3 +93,35 @@ if token and repo:
             api('PATCH', f'/issues/{n}', {'state': 'closed', 'state_reason': 'completed'})
     except Exception as e:
         print('Issue の更新に失敗:', e)
+
+# ---- LINE で知らせる ----
+# GitHub の Secrets に LINE_CHANNEL_ACCESS_TOKEN（LINE公式アカウントのチャネルアクセストークン）と
+# LINE_TO（受け取る人のユーザーID。U から始まる文字列）が登録されているときだけ送る。
+# 値はファイルに書かない（README のセキュリティのルール）。無料プランは月200通まで。
+line_token, line_to = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN'), os.environ.get('LINE_TO')
+if line_token and line_to:
+    jst = time.strftime('%m/%d', time.gmtime(time.time() + 9 * 3600))
+    seo = [sc.get('seo', 0) for _, sc in rows]
+    perf = [sc.get('performance', 0) for _, sc in rows]
+    msg = [f'【ホームページ 毎日のレポート {jst}】',
+           '結果: ' + ('要確認' if problems else '問題なし'),
+           f'SEO: {min(seo)}〜{max(seo)}点（{len(rows)}ページ）' if rows else 'SEO: 採点できず',
+           f'表示速度: {min(perf)}〜{max(perf)}点' if rows else '']
+    msg += [m.lstrip('- ') for m in monitor]
+    if problems:
+        msg += ['', '改善が必要なところ:'] + [p.replace(SITE, '/') for p in problems[:5]]
+    if report_url:
+        msg += ['', '詳しくはこちら:', report_url]
+    text = '\n'.join(x for x in msg if x is not None)[:4900]
+    req = urllib.request.Request('https://api.line.me/v2/bot/message/push',
+                                 data=json.dumps({'to': line_to, 'messages': [{'type': 'text', 'text': text}]}).encode(),
+                                 headers={'Authorization': 'Bearer ' + line_token, 'Content-Type': 'application/json'})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            print('LINE に送信しました:', r.status)
+    except urllib.error.HTTPError as e:
+        print('LINE の送信に失敗:', e.code, e.read()[:300].decode('utf-8', 'replace'))
+    except Exception as e:
+        print('LINE の送信に失敗:', e)
+else:
+    print('LINE の設定（Secrets）がないので、LINE には送っていません')

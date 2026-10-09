@@ -1,6 +1,7 @@
 name: 毎日のSEOチェックと報告
 # Google の Lighthouse で主要ページを採点する。GitHub の無料枠で動き、Claude のクレジットは使わない。
 # 毎日「毎日のレポート」を Issue として作り、GitHub からメールで届く（リポジトリを Watch → All Activity にしておく）。
+# Secrets に LINE_CHANNEL_ACCESS_TOKEN と LINE_TO を登録すると LINE にも届く。
 on:
   schedule:
     - cron: '43 23 * * *'   # 日本時間 毎朝 8:43（混雑時は遅れることがある）
@@ -32,4 +33,6 @@ jobs:
       - name: 結果をまとめて知らせる
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_TO: ${{ secrets.LINE_TO }}
         run: python3 ops/lighthouse.py
