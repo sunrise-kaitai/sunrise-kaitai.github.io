@@ -233,3 +233,23 @@ $('tabEdit').onclick=()=>show('edit');$('tabPrev').onclick=()=>show('prev');
 
 if(!co.coAddr)$('coCard').open=true;
 fill();
+
+/* ---------- 公式LINEのメニューから開いたとき：会社情報と角印を自動で入れる ----------
+   メニューのリンク末尾の #k=… が鍵。secure.json（鍵がないと読めない形で保存）を開いて、このスマホに保存する。 */
+(async function unlockCompany(){
+  const m=location.hash.match(/k=([A-Za-z0-9_-]{16,})/);
+  if(!m||!window.crypto||!crypto.subtle)return;
+  try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
+  const b=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((s.length+3)%4)),c=>c.charCodeAt(0));
+  try{
+    const r=await fetch('secure.json',{cache:'no-store'});if(!r.ok)return;
+    const j=await r.json();
+    const key=await crypto.subtle.importKey('raw',b(m[1]),'AES-GCM',false,['decrypt']);
+    const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:b(j.iv)},key,b(j.ct));
+    const o=JSON.parse(new TextDecoder().decode(plain));
+    [...C,'seal'].forEach(k=>{if(typeof o[k]==='string'&&o[k])co[k]=o[k]});
+    C.forEach(k=>$(k).value=co[k]??'');
+    LS.set('mt2_co',co);sealView();render();
+    $('coCard').open=false;
+  }catch(e){}
+})();
