@@ -1,9 +1,0 @@
-# 公式LINEで見積書を作る仕組み（Netlify で動かす）。秘密の値は Netlify の環境変数に入れる。
-[build]
-  command = "npm ci --omit=dev || npm install --omit=dev"
-  publish = "public"
-
-[functions]
-  node_bundler = "esbuild"
-  external_node_modules = ["@napi-rs/canvas"]
-  included_files = ["fonts/*.ttf"]

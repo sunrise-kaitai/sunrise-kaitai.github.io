@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
 Disallow: /mitsumori/
-Disallow: /line-bot/
 Sitemap: https://sunrise-kaitai.github.io/sitemap.xml
