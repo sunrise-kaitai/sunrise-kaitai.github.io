@@ -454,7 +454,7 @@ write('dist/_headers', "/assets/*\n  Cache-Control: public, max-age=604800\n/img
                        "/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n")
 
 # robots / sitemap
-robots = 'User-agent: *\nAllow: /\nDisallow: /mitsumori/\n' + (f'Sitemap: {DOMAIN.rstrip("/")}/sitemap.xml\n' if DOMAIN else '')
+robots = 'User-agent: *\nAllow: /\nDisallow: /mitsumori/\nDisallow: /line-bot/\n' + (f'Sitemap: {DOMAIN.rstrip("/")}/sitemap.xml\n' if DOMAIN else '')
 open('dist/robots.txt', 'w').write(robots)
 if DOMAIN:
     import datetime

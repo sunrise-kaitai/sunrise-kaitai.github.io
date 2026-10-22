@@ -1,0 +1,22 @@
+{
+  "name": "sunrise-line-mitsumori",
+  "version": "1.0.0",
+  "description": "公式LINEで見積書を作る",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.13",
+    "@netlify/blobs": "^11.1.6",
+    "pdf-lib": "^1.17.1"
+  },
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@netlify/functions": "^6.0.3",
+    "@types/node": "^26.6.5",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2"
+  }
+}
