@@ -144,7 +144,7 @@ async function initStore(){
     drawHist();
   }
 }
-$('sync').textContent=co.saveUrl?'保存先：このスマホ＋スプレッドシート':'保存先：このスマホ（このブラウザ）';drawHist();
+$('sync').textContent='保存先：このスマホ＋スプレッドシート';drawHist();
 
 $('coImport').onclick=()=>{
   const v=$('coCode').value.trim().replace(/^SUNRISE:/,'');
@@ -169,25 +169,50 @@ $('save').onclick=async()=>{
   await sendToSheet('保存');
 };
 /* スプレッドシート（sunrise 見積書一覧）にも記録する。送り先と合言葉は公式LINEのメニューから開いたときだけ入る */
-async function sendToSheet(action){
-  const st=$('sheetStatus');
-  if(!co.saveUrl||!co.saveToken){st.textContent='スプレッドシートに送れません。公式LINEのメニュー「見積書作成」から開き直してください';st.dataset.s='ng';st.hidden=false;return}
+/* 送り先はページに直接持たせる（スマホのブラウザが記憶を消しても届くように） */
+const SHEET_URL='https://script.google.com/macros/s/AKfycbzZYlvLhkLK51jRibjiZudhDAjI-0vNLXBmvkkeV5lRLg65UL33zhD6Y-MTjpFKpIDY/exec';
+const SHEET_TOKEN='tfiJUgLf7kxs1KcuHdO-JVNOTAGdQ9qL';
+const APP_VER='10/24-d';
+const PENDING='mt2_pending';
+function sheetBody(action){
   const c=calc(est);
-  const body={token:co.saveToken,action,id:est.id,no:est.no,date:est.date,cust:est.cust,hon:est.hon,memo:est.memo,disc:num(est.disc),
+  return {token:SHEET_TOKEN,action,at:new Date().toISOString(),id:est.id,no:est.no,date:est.date,cust:est.cust,hon:est.hon,memo:est.memo,disc:num(est.disc),
     sub:c.sub,tax:c.tax,total:c.total,items:c.rows.map(r=>({k:r.k,n:r.n,q:r.q,u:r.u,p:num(r.p),a:r.a}))};
-  st.textContent='スプレッドシートに送っています…';st.dataset.s='wait';st.hidden=false;
-  const hm=()=>{const d=new Date();return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0')};
-  for(let i=0;i<2;i++){
-    try{
-      const r=await fetch(co.saveUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});
-      const j=await r.json().catch(()=>({}));
-      if(j.ok){st.textContent=`✓ スプレッドシートに保存しました（${hm()}・${action}・${j.row}行目）`;st.dataset.s='ok';toast('スプレッドシートに保存しました');return}
-      if(j.error==='token'){st.textContent='スプレッドシートに送れませんでした。公式LINEのメニュー「見積書作成」から開き直してください';st.dataset.s='ng';return}
-    }catch(e){}
-    await new Promise(r=>setTimeout(r,1500));
-  }
-  st.textContent='スプレッドシートに送れませんでした。電波のよい所でもう一度押してください';st.dataset.s='ng';
 }
+async function postSheet(body){
+  // 1) ふつうに送って、返事を確かめる
+  try{
+    const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),15000);
+    const r=await fetch(SHEET_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),signal:ctl.signal});
+    clearTimeout(t);
+    const j=await r.json().catch(()=>null);
+    if(j&&j.ok)return {ok:true,row:j.row};
+    if(j&&j.error)return {ok:false,why:'受付エラー（'+j.error+'）'};
+  }catch(e){}
+  // 2) 返事が読めないブラウザ向け：返事を待たずに送る
+  try{
+    await fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});
+    return {ok:true,row:null};
+  }catch(e){}
+  try{if(navigator.sendBeacon&&navigator.sendBeacon(SHEET_URL,new Blob([JSON.stringify(body)],{type:'text/plain'})))return {ok:true,row:null}}catch(e){}
+  return {ok:false,why:'通信できませんでした'};
+}
+async function sendToSheet(action){
+  const st=$('sheetStatus');st.hidden=false;
+  const hm=()=>{const d=new Date();return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0')};
+  st.textContent=`スプレッドシートに送っています…（${action}）`;st.dataset.s='wait';
+  const body=sheetBody(action);
+  const r=await postSheet(body);
+  if(r.ok){st.textContent=`✓ スプレッドシートに保存しました（${hm()}・${action}${r.row?'・'+r.row+'行目':''}）`;st.dataset.s='ok';toast('スプレッドシートに保存しました');flushPending();return}
+  const q=LS.get(PENDING)||[];q.push(body);LS.set(PENDING,q.slice(-30));
+  st.textContent=`✕ スプレッドシートに送れませんでした（${r.why}）。次に開いたとき自動で送り直します`;st.dataset.s='ng';
+}
+async function flushPending(){
+  const q=LS.get(PENDING)||[];if(!q.length)return;
+  const left=[];for(const b of q){const r=await postSheet(b);if(!r.ok)left.push(b)}
+  LS.set(PENDING,left);
+}
+setTimeout(flushPending,3000);
 
 function drawHist(){
   const el=$('hist');
@@ -268,7 +293,6 @@ fill();
 (async function unlockCompany(){
   const m=location.hash.match(/k=([A-Za-z0-9_-]{16,})/);
   if(!m||!window.crypto||!crypto.subtle)return;
-  try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
   const b=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((s.length+3)%4)),c=>c.charCodeAt(0));
   try{
     const r=await fetch('secure.json',{cache:'no-store'});if(!r.ok)return;
@@ -277,7 +301,6 @@ fill();
     const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:b(j.iv)},key,b(j.ct));
     const o=JSON.parse(new TextDecoder().decode(plain));
     [...C,'seal','saveUrl','saveToken'].forEach(k=>{if(typeof o[k]==='string'&&o[k])co[k]=o[k]});
-    if(co.saveUrl)$('sync').textContent='保存先：このスマホ＋スプレッドシート';
     C.forEach(k=>$(k).value=co[k]??'');
     LS.set('mt2_co',co);sealView();render();
     $('coCard').open=false;

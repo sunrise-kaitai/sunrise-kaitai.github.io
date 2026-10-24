@@ -26,9 +26,13 @@ function doPost(e) {
     const d = JSON.parse(e.postData.contents);
     const token = PropertiesService.getScriptProperties().getProperty('SAVE_TOKEN');
     if (!token || d.token !== token) return out({ ok: false, error: 'token' });
+    // 同じ押し方（同じ見積書・同じ操作・同じ時刻）が2回届いたら、2回目は記録しない
+    const key = [d.id, d.action, d.at].join('|').slice(0, 240);
+    const cache = CacheService.getScriptCache();
     const lock = LockService.getScriptLock();
     lock.waitLock(10000);
     try {
+      if (d.at && cache.get(key)) return out({ ok: true, row: null, dup: true });
       const sh = sheet_();
       const s = (v, n) => String(v == null ? '' : v).slice(0, n || 500);
       const items = Array.isArray(d.items) ? d.items.slice(0, 50) : [];
@@ -40,6 +44,7 @@ function doPost(e) {
         s(d.memo, 1000), lines.join('\n'), s(d.id, 40),
       ];
       sh.appendRow(row);
+      if (d.at) cache.put(key, '1', 600);
       return out({ ok: true, row: sh.getLastRow() });
     } finally {
       lock.releaseLock();
