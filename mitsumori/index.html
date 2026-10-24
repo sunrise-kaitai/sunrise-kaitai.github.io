@@ -121,6 +121,9 @@ details[open].card summary::after{content:"－"}
   padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
 .bar .in{max-width:1320px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .bar .sp{flex:1}
+.sst{flex:1 1 100%;margin:0;font-size:13px;font-weight:700;padding:6px 10px;border-radius:6px;background:var(--field);color:var(--dim)}
+.sst[data-s=ok]{background:#E3F4EA;color:#1E6B3F}
+.sst[data-s=ng]{background:#FBE6E4;color:#9B2C22}
 .toast{position:fixed;left:50%;bottom:calc(80px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:99px;font-size:13px;z-index:9;max-width:90vw}
 .confirm{display:flex;gap:6px;align-items:center;font-size:12px}
 #offscreen{position:fixed;left:-10000px;top:0}
@@ -224,6 +227,7 @@ details[open].card summary::after{content:"－"}
 </div>
 
 <div class="bar"><div class="in">
+  <p class="sst" id="sheetStatus" hidden></p>
   <button class="btn" id="save">保存</button>
   <span class="sp"></span>
   <button class="btn" id="copyLine">文章をコピー</button>
@@ -240,6 +244,6 @@ details[open].card summary::after{content:"－"}
 
 <script src="html2canvas.min.js"></script>
 <script src="jspdf.umd.min.js"></script>
-<script src="app.js"></script>
+<script src="app.js?v=20261024c"></script>
 
 </body></html>

@@ -166,21 +166,29 @@ $('save').onclick=async()=>{
   LS.set('mt2_co',co);
   if(db){try{await db.doc(`data/users/${uid}/estimates/${est.id}`).set(rec);await db.doc(`data/users/${uid}/settings/company`).set(co);toast('保存しました')}catch(e){toast('保存できませんでした。もう一度押してください')}}
   else{saved=[rec,...saved.filter(s=>s.id!==est.id)];LS.set('mt2_list',saved);drawHist();toast('このスマホに保存しました')}
-  await sendToSheet();
+  await sendToSheet('保存');
 };
 /* スプレッドシート（sunrise 見積書一覧）にも記録する。送り先と合言葉は公式LINEのメニューから開いたときだけ入る */
-async function sendToSheet(quiet){
-  if(!co.saveUrl||!co.saveToken){$('sync').textContent='保存先：このスマホ（シートに送るには、公式LINEのメニューから開いてください）';return}
+async function sendToSheet(action){
+  const st=$('sheetStatus');
+  if(!co.saveUrl||!co.saveToken){st.textContent='スプレッドシートに送れません。公式LINEのメニュー「見積書作成」から開き直してください';st.dataset.s='ng';st.hidden=false;return}
   const c=calc(est);
-  const body={token:co.saveToken,id:est.id,no:est.no,date:est.date,cust:est.cust,hon:est.hon,memo:est.memo,disc:num(est.disc),
+  const body={token:co.saveToken,action,id:est.id,no:est.no,date:est.date,cust:est.cust,hon:est.hon,memo:est.memo,disc:num(est.disc),
     sub:c.sub,tax:c.tax,total:c.total,items:c.rows.map(r=>({k:r.k,n:r.n,q:r.q,u:r.u,p:num(r.p),a:r.a}))};
-  try{
-    const r=await fetch(co.saveUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});
-    const j=await r.json().catch(()=>({}));
-    if(j.ok){if(!quiet)toast(j.updated?'スプレッドシートの行を更新しました':'スプレッドシートに保存しました');$('sync').textContent='保存先：このスマホ＋スプレッドシート'}
-    else toast('スプレッドシートに送れませんでした。公式LINEのメニューから開き直してください');
-  }catch(e){toast('スプレッドシートに送れませんでした。電波のよい所でもう一度「保存」を押してください')}
+  st.textContent='スプレッドシートに送っています…';st.dataset.s='wait';st.hidden=false;
+  const hm=()=>{const d=new Date();return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0')};
+  for(let i=0;i<2;i++){
+    try{
+      const r=await fetch(co.saveUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});
+      const j=await r.json().catch(()=>({}));
+      if(j.ok){st.textContent=`✓ スプレッドシートに保存しました（${hm()}・${action}・${j.row}行目）`;st.dataset.s='ok';toast('スプレッドシートに保存しました');return}
+      if(j.error==='token'){st.textContent='スプレッドシートに送れませんでした。公式LINEのメニュー「見積書作成」から開き直してください';st.dataset.s='ng';return}
+    }catch(e){}
+    await new Promise(r=>setTimeout(r,1500));
+  }
+  st.textContent='スプレッドシートに送れませんでした。電波のよい所でもう一度押してください';st.dataset.s='ng';
 }
+
 function drawHist(){
   const el=$('hist');
   if(!saved.length){el.innerHTML='<p class="note">まだありません。下の「保存」を押すとここに残ります。</p>';return}
@@ -229,7 +237,7 @@ $('ovClose').onclick=()=>$('ov').hidden=true;
 $('ovExt').href=location.origin+location.pathname+'?openExternalBrowser=1';
 async function busy(btn,fn){btn.disabled=true;const t=btn.textContent;btn.textContent='作成中…';try{await fn()}finally{btn.disabled=false;btn.textContent=t}}
 $('pdf').onclick=e=>busy(e.currentTarget,async()=>{
-  saveLocal(true);sendToSheet(true);
+  saveLocal(true);sendToSheet('PDF');
   const cv=await snapshot();const {jsPDF}=window.jspdf;const pdf=new jsPDF({unit:'mm',format:'a4'});
   const W=210,H=297,pxPerPage=Math.floor(cv.width*H/W);
   for(let y=0,p=0;y<cv.height;y+=pxPerPage,p++){
@@ -239,7 +247,7 @@ $('pdf').onclick=e=>busy(e.currentTarget,async()=>{
   }
   await offer(fname('pdf'),pdf.output('blob'),cv);
 });
-$('png').onclick=e=>busy(e.currentTarget,async()=>{saveLocal(true);sendToSheet(true);const cv=await snapshot();const b=await new Promise(r=>cv.toBlob(r,'image/png'));await offer(fname('png'),b,cv)});
+$('png').onclick=e=>busy(e.currentTarget,async()=>{saveLocal(true);sendToSheet('画像');const cv=await snapshot();const b=await new Promise(r=>cv.toBlob(r,'image/png'));await offer(fname('png'),b,cv)});
 $('copyLine').onclick=async()=>{
   const c=calc(est);
   const subj=(est.items.find(i=>i.n)||{}).n||'';
