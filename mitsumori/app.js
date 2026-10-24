@@ -1,3 +1,17 @@
+/* 古い画面が残っていたら、新しい画面を読み直す（LINEの中のブラウザは古い画面を覚えていることがある） */
+function keepFresh(){
+  const MY='10/25-f';
+  fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'').then(v=>{
+    v=(v||'').trim();if(!v||v===MY)return;
+    let tried='';try{tried=sessionStorage.getItem('mt_reload')||''}catch(e){}
+    if(tried===v)return;
+    try{sessionStorage.setItem('mt_reload',v)}catch(e){}
+    location.replace(location.pathname+'?v='+encodeURIComponent(v)+'&t='+Date.now()+location.hash);
+  }).catch(()=>{});
+}
+keepFresh();
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')keepFresh()});
+window.addEventListener('hashchange',keepFresh);
 
 const $=id=>document.getElementById(id);
 const yen=n=>'¥'+Math.round(n||0).toLocaleString('ja-JP');
@@ -183,7 +197,7 @@ $('save').onclick=async()=>{
 /* 送り先はページに直接持たせる（スマホのブラウザが記憶を消しても届くように） */
 const SHEET_URL='https://script.google.com/macros/s/AKfycbzZYlvLhkLK51jRibjiZudhDAjI-0vNLXBmvkkeV5lRLg65UL33zhD6Y-MTjpFKpIDY/exec';
 const SHEET_TOKEN='tfiJUgLf7kxs1KcuHdO-JVNOTAGdQ9qL';
-const APP_VER='10/25-e';
+const APP_VER='10/25-f';
 const PENDING='mt2_pending';
 function sheetBody(action){
   const c=calc(est);
@@ -194,7 +208,7 @@ async function postSheet(body){
   // 1) ふつうに送って、返事を確かめる
   try{
     const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),15000);
-    const r=await fetch(SHEET_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),signal:ctl.signal});
+    const r=await fetch(SHEET_URL,{method:'POST',keepalive:true,headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),signal:ctl.signal});
     clearTimeout(t);
     const j=await r.json().catch(()=>null);
     if(j&&j.ok)return {ok:true,row:j.row};
@@ -213,6 +227,8 @@ async function sendToSheet(action){
   const hm=()=>{const d=new Date();return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0')};
   st.textContent=`スプレッドシートに送っています…（${action}）`;st.dataset.s='wait';
   const body=sheetBody(action);
+  // 共有画面が開くとページが止まることがあるので、先に「確実に届く送り方」でも送っておく（同じものは1行にまとまる）
+  if(action==='画像'||action==='PDF'||action==='自動保存'){try{navigator.sendBeacon&&navigator.sendBeacon(SHEET_URL,new Blob([JSON.stringify(body)],{type:'text/plain'}))}catch(e){}}
   const r=await postSheet(body);
   if(r.ok){st.textContent=`✓ スプレッドシートに保存しました（${hm()}・${action}${r.row?'・'+r.row+'行目':''}）`;st.dataset.s='ok';toast('スプレッドシートに保存しました');flushPending();return}
   const q=LS.get(PENDING)||[];q.push(body);LS.set(PENDING,q.slice(-30));
