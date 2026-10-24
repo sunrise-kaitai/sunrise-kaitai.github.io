@@ -155,6 +155,12 @@ $('saveCo').onclick=async()=>{LS.set('mt2_co',co);
   if(db){try{await db.doc(`data/users/${uid}/settings/company`).set(co);toast('会社情報を保存しました')}catch(e){toast('保存できませんでした。もう一度押してください')}}
   else toast('会社情報をこのスマホに保存しました')};
 
+/* スマホへの保存（quiet=true のときはお知らせを出さない） */
+function saveLocal(quiet){
+  const c=calc(est);const rec={...est,sample:false,total:c.total,updatedAt:new Date().toISOString()};
+  LS.set('mt2_co',co);saved=[rec,...saved.filter(s=>s.id!==est.id)];LS.set('mt2_list',saved);drawHist();
+  if(!quiet)toast('このスマホに保存しました');
+}
 $('save').onclick=async()=>{
   const c=calc(est);const rec={...est,sample:false,total:c.total,updatedAt:new Date().toISOString()};
   LS.set('mt2_co',co);
@@ -163,7 +169,7 @@ $('save').onclick=async()=>{
   await sendToSheet();
 };
 /* スプレッドシート（sunrise 見積書一覧）にも記録する。送り先と合言葉は公式LINEのメニューから開いたときだけ入る */
-async function sendToSheet(){
+async function sendToSheet(quiet){
   if(!co.saveUrl||!co.saveToken){$('sync').textContent='保存先：このスマホ（シートに送るには、公式LINEのメニューから開いてください）';return}
   const c=calc(est);
   const body={token:co.saveToken,id:est.id,no:est.no,date:est.date,cust:est.cust,hon:est.hon,memo:est.memo,disc:num(est.disc),
@@ -171,7 +177,7 @@ async function sendToSheet(){
   try{
     const r=await fetch(co.saveUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});
     const j=await r.json().catch(()=>({}));
-    if(j.ok){toast(j.updated?'スプレッドシートの行を更新しました':'スプレッドシートに保存しました');$('sync').textContent='保存先：このスマホ＋スプレッドシート'}
+    if(j.ok){if(!quiet)toast(j.updated?'スプレッドシートの行を更新しました':'スプレッドシートに保存しました');$('sync').textContent='保存先：このスマホ＋スプレッドシート'}
     else toast('スプレッドシートに送れませんでした。公式LINEのメニューから開き直してください');
   }catch(e){toast('スプレッドシートに送れませんでした。電波のよい所でもう一度「保存」を押してください')}
 }
@@ -223,6 +229,7 @@ $('ovClose').onclick=()=>$('ov').hidden=true;
 $('ovExt').href=location.origin+location.pathname+'?openExternalBrowser=1';
 async function busy(btn,fn){btn.disabled=true;const t=btn.textContent;btn.textContent='作成中…';try{await fn()}finally{btn.disabled=false;btn.textContent=t}}
 $('pdf').onclick=e=>busy(e.currentTarget,async()=>{
+  saveLocal(true);sendToSheet(true);
   const cv=await snapshot();const {jsPDF}=window.jspdf;const pdf=new jsPDF({unit:'mm',format:'a4'});
   const W=210,H=297,pxPerPage=Math.floor(cv.width*H/W);
   for(let y=0,p=0;y<cv.height;y+=pxPerPage,p++){
@@ -232,7 +239,7 @@ $('pdf').onclick=e=>busy(e.currentTarget,async()=>{
   }
   await offer(fname('pdf'),pdf.output('blob'),cv);
 });
-$('png').onclick=e=>busy(e.currentTarget,async()=>{const cv=await snapshot();const b=await new Promise(r=>cv.toBlob(r,'image/png'));await offer(fname('png'),b,cv)});
+$('png').onclick=e=>busy(e.currentTarget,async()=>{saveLocal(true);sendToSheet(true);const cv=await snapshot();const b=await new Promise(r=>cv.toBlob(r,'image/png'));await offer(fname('png'),b,cv)});
 $('copyLine').onclick=async()=>{
   const c=calc(est);
   const subj=(est.items.find(i=>i.n)||{}).n||'';
