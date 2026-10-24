@@ -45,7 +45,7 @@ function fill(){
   F.forEach(k=>$(k).value=est[k]??'');
   (est.hon==='様'?$('hon1'):$('hon2')).checked=true;
   C.forEach(k=>$(k).value=co[k]??'');
-  sealView();renderItems();render();
+  sealView();renderItems();render();markSent();
 }
 function renderItems(){
   $('items').innerHTML=est.items.map((it,i)=>`<div class="item" data-i="${i}">
@@ -68,7 +68,20 @@ F.forEach(k=>$(k).addEventListener('input',()=>{est[k]=$(k).value;changed()}));
 document.querySelectorAll('input[name=hon]').forEach(r=>r.addEventListener('change',()=>{est.hon=r.value;changed()}));
 C.forEach(k=>$(k).addEventListener('input',()=>{co[k]=$(k).value;render()}));
 
-function changed(){if(est.sample){est.sample=false}LS.set('mt2_draft',est);render()}
+function changed(){if(est.sample){est.sample=false}LS.set('mt2_draft',est);render();scheduleAuto()}
+/* 文字を変えただけでも保存：入力が止まって4秒たったら、前回と中身が違えば自動で保存する */
+let autoT=null,lastSig='';
+const sig=()=>JSON.stringify([est.cust,est.hon,est.date,est.disc,est.tax,est.memo,est.items]);
+function markSent(){lastSig=sig()}
+function scheduleAuto(){clearTimeout(autoT);autoT=setTimeout(autoSave,4000)}
+function autoSave(){
+  clearTimeout(autoT);
+  const hasContent=est.cust||est.items.some(i=>i.n||num(i.p));
+  if(!hasContent||sig()===lastSig)return;
+  markSent();saveLocal(true,'自動保存');sendToSheet('自動保存');
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')autoSave()});
+window.addEventListener('pagehide',autoSave);
 
 /* ---------- 見積書 ---------- */
 const reiwa=s=>{if(!s)return'';const [y,m,d]=s.split('-');return `令和　${+y-2018}年　${+m}月${+d}日`};
@@ -156,23 +169,21 @@ $('saveCo').onclick=async()=>{LS.set('mt2_co',co);
   else toast('会社情報をこのスマホに保存しました')};
 
 /* スマホへの保存（quiet=true のときはお知らせを出さない） */
-function saveLocal(quiet){
-  const c=calc(est);const rec={...est,sample:false,total:c.total,updatedAt:new Date().toISOString()};
-  LS.set('mt2_co',co);saved=[rec,...saved.filter(s=>s.id!==est.id)];LS.set('mt2_list',saved);drawHist();
+function saveLocal(quiet,action){
+  const c=calc(est);const now=new Date();
+  const rec={...structuredClone(est),sample:false,total:c.total,updatedAt:now.toISOString(),act:action||'保存',key:est.id+'-'+now.getTime()};
+  LS.set('mt2_co',co);saved=[rec,...saved].slice(0,300);LS.set('mt2_list',saved);drawHist();
   if(!quiet)toast('このスマホに保存しました');
 }
 $('save').onclick=async()=>{
-  const c=calc(est);const rec={...est,sample:false,total:c.total,updatedAt:new Date().toISOString()};
-  LS.set('mt2_co',co);
-  if(db){try{await db.doc(`data/users/${uid}/estimates/${est.id}`).set(rec);await db.doc(`data/users/${uid}/settings/company`).set(co);toast('保存しました')}catch(e){toast('保存できませんでした。もう一度押してください')}}
-  else{saved=[rec,...saved.filter(s=>s.id!==est.id)];LS.set('mt2_list',saved);drawHist();toast('このスマホに保存しました')}
+  saveLocal(false,'保存');markSent();
   await sendToSheet('保存');
 };
 /* スプレッドシート（sunrise 見積書一覧）にも記録する。送り先と合言葉は公式LINEのメニューから開いたときだけ入る */
 /* 送り先はページに直接持たせる（スマホのブラウザが記憶を消しても届くように） */
 const SHEET_URL='https://script.google.com/macros/s/AKfycbzZYlvLhkLK51jRibjiZudhDAjI-0vNLXBmvkkeV5lRLg65UL33zhD6Y-MTjpFKpIDY/exec';
 const SHEET_TOKEN='tfiJUgLf7kxs1KcuHdO-JVNOTAGdQ9qL';
-const APP_VER='10/24-d';
+const APP_VER='10/25-e';
 const PENDING='mt2_pending';
 function sheetBody(action){
   const c=calc(est);
@@ -216,19 +227,20 @@ setTimeout(flushPending,3000);
 
 function drawHist(){
   const el=$('hist');
-  if(!saved.length){el.innerHTML='<p class="note">まだありません。下の「保存」を押すとここに残ります。</p>';return}
-  el.innerHTML=saved.map(s=>`<div class="h" data-id="${esc(s.id)}"><div><strong>${esc(s.cust||'（お客様名なし）')}　${esc((s.items&&s.items[0]&&s.items[0].n)||'')}</strong><span>${jdate(s.date)}・${yen(s.total)}</span></div>
+  if(!saved.length){el.innerHTML='<p class="note">まだありません。保存すると、1回ごとにここに残ります。</p>';return}
+  const tm=t=>{if(!t)return'';const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`};
+  el.innerHTML=saved.map(s=>`<div class="h" data-id="${esc(s.key||s.id)}"><div><strong>${esc(s.cust||'（お客様名なし）')}　${esc((s.items&&s.items[0]&&s.items[0].n)||'')}</strong><span>${tm(s.updatedAt)}・${esc(s.act||'保存')}・${yen(s.total)}</span></div>
     <div class="acts"><button class="btn small" data-open>開く</button><button class="btn small" data-copy>複製</button><button class="btn small" data-del>削除</button></div></div>`).join('');
 }
 $('hist').onclick=async e=>{
-  const h=e.target.closest('.h');if(!h)return;const s=saved.find(x=>x.id===h.dataset.id);if(!s)return;
-  if(e.target.hasAttribute('data-open')){est=structuredClone(s);LS.set('mt2_draft',est);fill();toast('開きました');show('edit')}
-  else if(e.target.hasAttribute('data-copy')){const n=newEstimate(false);est={...structuredClone(s),id:n.id,no:n.no,date:n.date};LS.set('mt2_draft',est);fill();toast('複製しました。お客様名などを直してください')}
+  const h=e.target.closest('.h');if(!h)return;const s=saved.find(x=>(x.key||x.id)===h.dataset.id);if(!s)return;
+  if(e.target.hasAttribute('data-open')){est=structuredClone(s);delete est.key;delete est.act;LS.set('mt2_draft',est);fill();toast('開きました');show('edit')}
+  else if(e.target.hasAttribute('data-copy')){const n=newEstimate(false);est={...structuredClone(s),id:n.id,no:n.no,date:n.date};delete est.key;delete est.act;LS.set('mt2_draft',est);fill();toast('複製しました。お客様名などを直してください')}
   else if(e.target.hasAttribute('data-del')){
     const a=h.querySelector('.acts');a.innerHTML='<span class="confirm">消しますか？<button class="btn small" data-yes>消す</button><button class="btn small" data-no>やめる</button></span>';}
   else if(e.target.hasAttribute('data-yes')){
     if(db){try{await db.doc(`data/users/${uid}/estimates/${s.id}`).delete()}catch(err){toast('削除できませんでした')}}
-    else{saved=saved.filter(x=>x.id!==s.id);LS.set('mt2_list',saved);drawHist()}}
+    else{saved=saved.filter(x=>x!==s);LS.set('mt2_list',saved);drawHist()}}
   else if(e.target.hasAttribute('data-no'))drawHist();
 };
 $('newEst').onclick=()=>{est=newEstimate(false);LS.set('mt2_draft',est);fill();$('cust').focus()};
@@ -262,7 +274,7 @@ $('ovClose').onclick=()=>$('ov').hidden=true;
 $('ovExt').href=location.origin+location.pathname+'?openExternalBrowser=1';
 async function busy(btn,fn){btn.disabled=true;const t=btn.textContent;btn.textContent='作成中…';try{await fn()}finally{btn.disabled=false;btn.textContent=t}}
 $('pdf').onclick=e=>busy(e.currentTarget,async()=>{
-  saveLocal(true);sendToSheet('PDF');
+  saveLocal(true,'PDF');markSent();sendToSheet('PDF');
   const cv=await snapshot();const {jsPDF}=window.jspdf;const pdf=new jsPDF({unit:'mm',format:'a4'});
   const W=210,H=297,pxPerPage=Math.floor(cv.width*H/W);
   for(let y=0,p=0;y<cv.height;y+=pxPerPage,p++){
@@ -272,7 +284,7 @@ $('pdf').onclick=e=>busy(e.currentTarget,async()=>{
   }
   await offer(fname('pdf'),pdf.output('blob'),cv);
 });
-$('png').onclick=e=>busy(e.currentTarget,async()=>{saveLocal(true);sendToSheet('画像');const cv=await snapshot();const b=await new Promise(r=>cv.toBlob(r,'image/png'));await offer(fname('png'),b,cv)});
+$('png').onclick=e=>busy(e.currentTarget,async()=>{saveLocal(true,'画像');markSent();sendToSheet('画像');const cv=await snapshot();const b=await new Promise(r=>cv.toBlob(r,'image/png'));await offer(fname('png'),b,cv)});
 $('copyLine').onclick=async()=>{
   const c=calc(est);
   const subj=(est.items.find(i=>i.n)||{}).n||'';
