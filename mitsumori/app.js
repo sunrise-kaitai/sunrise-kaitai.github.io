@@ -144,7 +144,7 @@ async function initStore(){
     drawHist();
   }
 }
-$('sync').textContent='保存先：このスマホ（このブラウザ）';drawHist();
+$('sync').textContent=co.saveUrl?'保存先：このスマホ＋スプレッドシート':'保存先：このスマホ（このブラウザ）';drawHist();
 
 $('coImport').onclick=()=>{
   const v=$('coCode').value.trim().replace(/^SUNRISE:/,'');
@@ -160,7 +160,21 @@ $('save').onclick=async()=>{
   LS.set('mt2_co',co);
   if(db){try{await db.doc(`data/users/${uid}/estimates/${est.id}`).set(rec);await db.doc(`data/users/${uid}/settings/company`).set(co);toast('保存しました')}catch(e){toast('保存できませんでした。もう一度押してください')}}
   else{saved=[rec,...saved.filter(s=>s.id!==est.id)];LS.set('mt2_list',saved);drawHist();toast('このスマホに保存しました')}
+  await sendToSheet();
 };
+/* スプレッドシート（sunrise 見積書一覧）にも記録する。送り先と合言葉は公式LINEのメニューから開いたときだけ入る */
+async function sendToSheet(){
+  if(!co.saveUrl||!co.saveToken){$('sync').textContent='保存先：このスマホ（シートに送るには、公式LINEのメニューから開いてください）';return}
+  const c=calc(est);
+  const body={token:co.saveToken,id:est.id,no:est.no,date:est.date,cust:est.cust,hon:est.hon,memo:est.memo,disc:num(est.disc),
+    sub:c.sub,tax:c.tax,total:c.total,items:c.rows.map(r=>({k:r.k,n:r.n,q:r.q,u:r.u,p:num(r.p),a:r.a}))};
+  try{
+    const r=await fetch(co.saveUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});
+    const j=await r.json().catch(()=>({}));
+    if(j.ok){toast(j.updated?'スプレッドシートの行を更新しました':'スプレッドシートに保存しました');$('sync').textContent='保存先：このスマホ＋スプレッドシート'}
+    else toast('スプレッドシートに送れませんでした。公式LINEのメニューから開き直してください');
+  }catch(e){toast('スプレッドシートに送れませんでした。電波のよい所でもう一度「保存」を押してください')}
+}
 function drawHist(){
   const el=$('hist');
   if(!saved.length){el.innerHTML='<p class="note">まだありません。下の「保存」を押すとここに残ります。</p>';return}
@@ -247,7 +261,8 @@ fill();
     const key=await crypto.subtle.importKey('raw',b(m[1]),'AES-GCM',false,['decrypt']);
     const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:b(j.iv)},key,b(j.ct));
     const o=JSON.parse(new TextDecoder().decode(plain));
-    [...C,'seal'].forEach(k=>{if(typeof o[k]==='string'&&o[k])co[k]=o[k]});
+    [...C,'seal','saveUrl','saveToken'].forEach(k=>{if(typeof o[k]==='string'&&o[k])co[k]=o[k]});
+    if(co.saveUrl)$('sync').textContent='保存先：このスマホ＋スプレッドシート';
     C.forEach(k=>$(k).value=co[k]??'');
     LS.set('mt2_co',co);sealView();render();
     $('coCard').open=false;
