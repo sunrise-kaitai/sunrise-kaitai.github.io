@@ -155,7 +155,20 @@ $('saveCo').onclick=async()=>{LS.set('mt2_co',co);
   if(db){try{await db.doc(`data/users/${uid}/settings/company`).set(co);toast('会社情報を保存しました')}catch(e){toast('保存できませんでした。もう一度押してください')}}
   else toast('会社情報をこのスマホに保存しました')};
 
+/* ---------- 作った見積を社内の記録シート（勤務・前借 記録）に送る ---------- */
+const RECORD_URL='https://script.google.com/macros/s/AKfycbxXJnMA6HR-6-LF7oEo9cYObvMuGn9lWjFxM0xxT5KFMHRlnBFHTUDe6_DoD08yEHjn-w/exec';
+function record(){
+  try{
+    const c=calc(est);if(!c.total&&!est.cust)return;
+    const body={kind:'mitsumori',id:est.id,no:est.no,date:est.date,cust:est.cust,hon:est.hon,
+      subject:(est.items.find(i=>i.n)||{}).n||'',sub:c.sub,tax:c.tax,total:c.total,
+      items:c.rows.map(r=>({k:r.k,n:r.n,q:r.q,u:r.u,p:num(r.p),a:r.a}))};
+    fetch(RECORD_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(body),keepalive:true}).catch(()=>{});
+  }catch(e){}
+}
+
 $('save').onclick=async()=>{
+  record();
   const c=calc(est);const rec={...est,sample:false,total:c.total,updatedAt:new Date().toISOString()};
   LS.set('mt2_co',co);
   if(db){try{await db.doc(`data/users/${uid}/estimates/${est.id}`).set(rec);await db.doc(`data/users/${uid}/settings/company`).set(co);toast('保存しました')}catch(e){toast('保存できませんでした。もう一度押してください')}}
@@ -208,7 +221,7 @@ async function offer(filename,data,previewCanvas){
 $('ovClose').onclick=()=>$('ov').hidden=true;
 $('ovExt').href=location.origin+location.pathname+'?openExternalBrowser=1';
 async function busy(btn,fn){btn.disabled=true;const t=btn.textContent;btn.textContent='作成中…';try{await fn()}finally{btn.disabled=false;btn.textContent=t}}
-$('pdf').onclick=e=>busy(e.currentTarget,async()=>{
+$('pdf').onclick=e=>busy(e.currentTarget,async()=>{record();
   const cv=await snapshot();const {jsPDF}=window.jspdf;const pdf=new jsPDF({unit:'mm',format:'a4'});
   const W=210,H=297,pxPerPage=Math.floor(cv.width*H/W);
   for(let y=0,p=0;y<cv.height;y+=pxPerPage,p++){
@@ -218,8 +231,9 @@ $('pdf').onclick=e=>busy(e.currentTarget,async()=>{
   }
   await offer(fname('pdf'),pdf.output('blob'),cv);
 });
-$('png').onclick=e=>busy(e.currentTarget,async()=>{const cv=await snapshot();const b=await new Promise(r=>cv.toBlob(r,'image/png'));await offer(fname('png'),b,cv)});
+$('png').onclick=e=>busy(e.currentTarget,async()=>{record();const cv=await snapshot();const b=await new Promise(r=>cv.toBlob(r,'image/png'));await offer(fname('png'),b,cv)});
 $('copyLine').onclick=async()=>{
+  record();
   const c=calc(est);
   const subj=(est.items.find(i=>i.n)||{}).n||'';
   const t=[`${est.cust||''}${est.cust?' '+(est.hon||'御中'):''}`,'','いつもお世話になっております。','お見積りをお送りします。','',subj?`項目：${subj}`:'',`${c.rate?'税込見積金額':'見積金額'}：${yen(c.total)}`,'','詳しくは添付の見積書をご確認ください。','ご不明な点はお気軽にご連絡ください。','',co.coName,co.coRep?`担当：${co.coRep}`:'',co.coTel?`TEL：${co.coTel}`:''].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n');
