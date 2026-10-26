@@ -29,12 +29,23 @@ function doPost(e) {
     // 同じ押し方（同じ見積書・同じ操作・同じ時刻）が2回届いたら、2回目は記録しない
     const key = [d.id, d.action, d.at].join('|').slice(0, 240);
     const cache = CacheService.getScriptCache();
+    // 送りすぎ防止：10分間に120回を超えたら受け付けない（いたずらでシートが埋まらないように）
+    const bucket = 'n' + Math.floor(Date.now() / 600000);
+    const n = Number(cache.get(bucket) || 0);
+    if (n >= 120) return out({ ok: false, error: 'busy' });
+    cache.put(bucket, String(n + 1), 700);
     const lock = LockService.getScriptLock();
     lock.waitLock(10000);
     try {
       if (d.at && cache.get(key)) return out({ ok: true, row: null, dup: true });
       const sh = sheet_();
-      const s = (v, n) => String(v == null ? '' : v).slice(0, n || 500);
+      // 文字は数式として入らないようにする（= + - @ などで始まると、シートを開いたときに数式が動いてしまうため）
+      const s = (v, n) => {
+        const t = String(v == null ? '' : v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').slice(0, n || 500);
+        return /^[=+\-@\t\r\n＝＋－＠]/.test(t) ? "'" + t : t;
+      };
+      const ACTIONS = ['保存', 'PDF', '画像', '自動保存'];
+      d.action = ACTIONS.indexOf(String(d.action)) >= 0 ? d.action : '保存';
       const items = Array.isArray(d.items) ? d.items.slice(0, 50) : [];
       const lines = items.map((i) => [s(i.k, 50), s(i.n, 100), s(i.q, 20) + s(i.u, 10), Number(i.p) || 0, Number(i.a) || 0].join(' / '));
       const row = [
