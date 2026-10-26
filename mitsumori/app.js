@@ -1,6 +1,6 @@
 /* 古い画面が残っていたら、新しい画面を読み直す（LINEの中のブラウザは古い画面を覚えていることがある） */
 function keepFresh(){
-  const MY='10/25-f';
+  const MY='10/26-a';
   fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'').then(v=>{
     v=(v||'').trim();if(!v||v===MY)return;
     let tried='';try{tried=sessionStorage.getItem('mt_reload')||''}catch(e){}
@@ -193,18 +193,21 @@ $('save').onclick=async()=>{
   saveLocal(false,'保存');markSent();
   await sendToSheet('保存');
 };
-/* スプレッドシート（sunrise 見積書一覧）にも記録する。送り先と合言葉は公式LINEのメニューから開いたときだけ入る */
-/* 送り先はページに直接持たせる（スマホのブラウザが記憶を消しても届くように） */
+/* スプレッドシート（sunrise 見積書一覧）にも記録する。
+   送り先はページに直接持たせる（スマホのブラウザが記憶を消しても届くように）。
+   合言葉はページには書かない。公式LINEのメニューから開くたびに secure.json の鍵を開けて読み込む（誰でも見られる場所に置かないため）。 */
 const SHEET_URL='https://script.google.com/macros/s/AKfycbzZYlvLhkLK51jRibjiZudhDAjI-0vNLXBmvkkeV5lRLg65UL33zhD6Y-MTjpFKpIDY/exec';
-const SHEET_TOKEN='tfiJUgLf7kxs1KcuHdO-JVNOTAGdQ9qL';
-const APP_VER='10/25-f';
+const sheetToken=()=>co.saveToken||'';
+const APP_VER='10/26-a';
 const PENDING='mt2_pending';
 function sheetBody(action){
   const c=calc(est);
-  return {token:SHEET_TOKEN,action,at:new Date().toISOString(),id:est.id,no:est.no,date:est.date,cust:est.cust,hon:est.hon,memo:est.memo,disc:num(est.disc),
+  return {action,at:new Date().toISOString(),id:est.id,no:est.no,date:est.date,cust:est.cust,hon:est.hon,memo:est.memo,disc:num(est.disc),
     sub:c.sub,tax:c.tax,total:c.total,items:c.rows.map(r=>({k:r.k,n:r.n,q:r.q,u:r.u,p:num(r.p),a:r.a}))};
 }
-async function postSheet(body){
+async function postSheet(b){
+  const tk=sheetToken();if(!tk)return {ok:false,why:'合言葉がありません。公式LINEのメニュー「見積書作成」から開き直してください',nokey:true};
+  const body=Object.assign({},b,{token:tk});
   // 1) ふつうに送って、返事を確かめる
   try{
     const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),15000);
@@ -228,7 +231,7 @@ async function sendToSheet(action){
   st.textContent=`スプレッドシートに送っています…（${action}）`;st.dataset.s='wait';
   const body=sheetBody(action);
   // 共有画面が開くとページが止まることがあるので、先に「確実に届く送り方」でも送っておく（同じものは1行にまとまる）
-  if(action==='画像'||action==='PDF'||action==='自動保存'){try{navigator.sendBeacon&&navigator.sendBeacon(SHEET_URL,new Blob([JSON.stringify(body)],{type:'text/plain'}))}catch(e){}}
+  if(sheetToken()&&(action==='画像'||action==='PDF'||action==='自動保存')){try{navigator.sendBeacon&&navigator.sendBeacon(SHEET_URL,new Blob([JSON.stringify(Object.assign({},body,{token:sheetToken()}))],{type:'text/plain'}))}catch(e){}}
   const r=await postSheet(body);
   if(r.ok){st.textContent=`✓ スプレッドシートに保存しました（${hm()}・${action}${r.row?'・'+r.row+'行目':''}）`;st.dataset.s='ok';toast('スプレッドシートに保存しました');flushPending();return}
   const q=LS.get(PENDING)||[];q.push(body);LS.set(PENDING,q.slice(-30));
@@ -332,5 +335,8 @@ fill();
     C.forEach(k=>$(k).value=co[k]??'');
     LS.set('mt2_co',co);sealView();render();
     $('coCard').open=false;
+    flushPending();
+    // 鍵（#k=…）をアドレス欄から消す。リンクをコピーして人に送っても鍵が漏れないように
+    try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
   }catch(e){}
 })();

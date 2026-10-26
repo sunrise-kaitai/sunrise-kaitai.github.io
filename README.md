@@ -11,7 +11,7 @@
 | 直下の `*.html`, `assets/`, `img/`, `column/`, `sitemap.xml` など | `publish.sh` が作る公開用ファイル。**直接編集しない** |
 | `redirect-cloudflare/` | 旧アドレス sunrise-kaitai.pages.dev → 新アドレスへの転送用 zip |
 | `mitsumori/` | 社内用の見積書メーカー（公式LINEのメニューから開く）。`publish.sh` では消えない。検索には出さない（robots で除外・noindex）。会社の住所・担当者の連絡先・角印は `secure.json` に**鍵をかけて**入れてあり、鍵は公式LINE（sunriseサーバー用）のメニューのリンク末尾 `#k=…` にだけある（リポジトリには書かない）。メニューから開くと自動で入り、そのスマホに保存される |
-| `ops/mitsumori-sheet.gs` | 見積書メーカーの「保存」を Google スプレッドシート「sunrise 見積書一覧」に記録する Apps Script（松浦様の Google アカウント）。合言葉はスクリプト プロパティ `SAVE_TOKEN`、送り先URLと合言葉は `mitsumori/app.js` に直接書いてある（スマホのブラウザが記憶を消しても届くように。書けるのは行の追加だけで、シートの中身は読めない）。「保存」「PDF」「画像」を押すたびに1行足す（「操作」列に何を押したか）|
+| `ops/mitsumori-sheet.gs` | 見積書メーカーの「保存」を Google スプレッドシート「sunrise 見積書一覧」に記録する Apps Script（松浦様の Google アカウント）。合言葉はスクリプト プロパティ `SAVE_TOKEN`。送り先URLは `mitsumori/app.js` に直接書いてあるが、**合言葉はページに書かない**（`secure.json` の中にだけ入れ、公式LINEのメニューから開いたときに読み込む）。合言葉がないときに押した分はスマホに取っておき、メニューから開き直したら自動で送る。Apps Script は = + - @ で始まる文字を数式にしない・10分120回まで。「保存」「PDF」「画像」を押すたびに1行足す（「操作」列に何を押したか）|
 | `ops/seo-log.md` | 毎日のSEOチェックの記録 |
 | `ops/owner-tasks.md` | 松浦様にお願いしたい作業（Search Console・転送・Googleビジネスプロフィール・独自ドメイン・口コミ）の手順と文面 |
 | `ops/monitor.py`, `.github/workflows/site-monitor.yml` | 公開サイトの自動監視（5分ごと）。異常があると Issue「サイト監視: 異常あり」が立ち、直ると自動で閉じる |
