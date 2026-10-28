@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://static.line-scdn.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://profile.line-scdn.net https://obs.line-scdn.net; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://api.line.me https://access.line.me https://liffsdk.line-scdn.net https://uts-front.line-apps.com; frame-src https://liff-subwindow.line.me; form-action 'self' https://access.line.me; base-uri 'self'; object-src 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>見積書メーカー | 株式会社sunrise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Shippori+Mincho:wght@600;800&display=swap">
+<style>
+/* Layout: 左に入力、右に実寸の見積書（A4）を縮小表示。スマホでは「入力／見積書」を切り替え。 */
+:root{
+  --bg:#EEF0F3; --panel:#FFFFFF; --ink:#17263D; --dim:#5D6878; --line:#D5DAE2;
+  --sun:#E8742A; --sun-ink:#FFFFFF; --field:#F7F8FA; --ok:#2F7D4F; --danger:#B4352C;
+  --ui:"BIZ UDPGothic","Hiragino Sans","Yu Gothic UI",Meiryo,sans-serif;
+  --mincho:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#10161F; --panel:#18212D; --ink:#E6EBF2; --dim:#9AA5B5; --line:#2C3847;
+  --sun:#F08A45; --sun-ink:#1A1206; --field:#121A24; --ok:#5DBB83; --danger:#E5695F; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10161F; --panel:#18212D; --ink:#E6EBF2; --dim:#9AA5B5; --line:#2C3847;
+  --sun:#F08A45; --sun-ink:#1A1206; --field:#121A24; --ok:#5DBB83; --danger:#E5695F; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:14px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 96px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+header.top h1{font-family:var(--mincho);font-weight:800;font-size:22px;margin:0;letter-spacing:.04em}
+header.top h1 small{font-family:var(--ui);font-weight:400;font-size:12px;color:var(--dim);margin-left:8px;letter-spacing:0}
+.sync{font-size:12px;color:var(--dim)}
+.tabs{display:none;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px}
+.tabs button{flex:1;border:0;background:none;padding:10px;border-radius:7px;font:inherit;font-weight:700;color:var(--dim);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+.grid{display:grid;grid-template-columns:minmax(0,520px) minmax(0,1fr);gap:20px;align-items:start}
+.col{min-width:0;display:flex;flex-direction:column;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.card h2{margin:0;font-size:13px;letter-spacing:.08em;color:var(--dim);font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fld label{font-size:12px;color:var(--dim)}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:7px;padding:8px 10px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:70px}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--sun);outline-offset:1px}
+.seg{display:flex;gap:4px}
+.seg label{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;border:1px solid var(--line);border-radius:7px;padding:7px;cursor:pointer;font-size:13px}
+.seg input{width:auto}
+.items{display:flex;flex-direction:column;gap:8px}
+.item{display:grid;grid-template-columns:110px 1fr 1fr 32px;gap:6px;align-items:center;padding-bottom:8px;border-bottom:1px dashed var(--line)}
+.item .q{display:grid;grid-template-columns:1fr 64px 1.6fr;gap:6px;grid-column:1/4}
+.item label.mini{font-size:11px;color:var(--dim)}
+.item input{padding:7px 8px}
+.item .num{text-align:right;font-variant-numeric:tabular-nums}
+.x{border:0;background:none;color:var(--dim);font-size:18px;cursor:pointer;border-radius:6px;height:34px}
+.x:hover{color:var(--danger);background:var(--field)}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px dashed var(--line);background:none;color:var(--ink);font:inherit;font-size:12px;padding:5px 10px;border-radius:99px;cursor:pointer}
+.chip:hover{border-color:var(--sun);color:var(--sun)}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;font-weight:700;padding:10px 14px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--sun);border-color:var(--sun);color:var(--sun-ink)}
+.btn.line{background:#06C755;border-color:#06C755;color:#fff}
+.btn.small{padding:6px 10px;font-size:12px;font-weight:400}
+.btn[disabled]{opacity:.5;cursor:wait}
+.totals{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums;font-size:13px;color:var(--dim)}
+.totals b{color:var(--ink);font-size:16px}
+details.card summary{cursor:pointer;font-size:13px;letter-spacing:.08em;color:var(--dim);font-weight:700;list-style:none}
+details.card summary::after{content:"＋";float:right}
+details[open].card summary::after{content:"－"}
+.hist{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow:auto}
+.h{display:flex;gap:8px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.h div{min-width:0}
+.h strong{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h span{font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums}
+.h .acts{display:flex;gap:4px;flex-shrink:0}
+.note{font-size:12px;color:var(--dim);margin:0}
+.seal-prev{display:flex;align-items:center;gap:10px}
+.seal-prev img{width:56px;height:56px;object-fit:contain;border:1px solid var(--line);border-radius:6px;background:#fff}
+
+/* preview */
+.stage{position:sticky;top:16px;min-width:0}
+.viewport{width:100%;overflow:hidden;border-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.08),0 8px 28px rgba(23,38,61,.14)}
+.badge{display:inline-block;background:var(--sun);color:var(--sun-ink);font-size:11px;padding:2px 8px;border-radius:99px;font-weight:700}
+
+/* 見積書そのもの（紙なので常に白地・黒字。テーマに追従させない）。御社のスプレッドシート版と同じ組み方 */
+.sheet{width:794px;min-height:1123px;background:#fff;color:#111;padding:48px 72px 48px;font-family:var(--ui);font-size:13.5px;line-height:1.5;transform-origin:0 0;position:relative}
+.sheet .date{text-align:right;font-size:13px}
+.sheet .ttl{font-weight:700;font-size:32px;margin:6px 0 20px;text-align:center;letter-spacing:.12em}
+.sheet .to{display:flex;align-items:flex-end}
+.sheet .to .nm{width:440px;border-bottom:1.5px solid #111;text-align:center;font-size:21px;padding-bottom:3px;word-break:break-all}
+.sheet .to .hon{font-size:21px;margin-left:10px}
+.sheet .mid{display:grid;grid-template-columns:440px 1fr;margin-top:18px}
+.sheet .lead{align-self:end;margin:0;font-size:14px}
+.sheet .co{font-size:13.5px;line-height:1.6;position:relative}
+.sheet .co .cn{font-size:18px;font-weight:700;margin-bottom:4px}
+.sheet .co .sm{font-size:12.5px}
+.sheet .co .ind{padding-left:42px}
+.sheet .co .tel{display:grid;grid-template-columns:auto auto;justify-content:start;column-gap:8px}
+.sheet .co .tel span:first-child{grid-row:span 3}
+.sheet .co .rep{margin-top:2px}
+.sheet .seal{position:absolute;right:6px;bottom:-84px;width:78px;height:auto}
+.sheet .amount{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid #111;width:440px;margin-top:20px}
+.sheet .amount span{display:flex;align-items:center;justify-content:center;font-size:17px;padding:6px 0;border-right:1.5px solid #111;background:#F2F2F2}
+.sheet .amount strong{text-align:center;font-size:22px;padding:5px 0;font-variant-numeric:tabular-nums}
+.sheet table{width:100%;border-collapse:collapse;margin-top:20px;font-variant-numeric:tabular-nums;table-layout:fixed}
+.sheet th{background:#BFBFBF;font-weight:700;font-size:13.5px;padding:4px;border:1px solid #111;text-align:center}
+.sheet td{border:1px solid #111;height:26px;padding:0 8px;font-size:13px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.sheet td.c{text-align:center}
+.sheet td.n{text-align:right}
+.sheet .foot{display:grid;grid-template-columns:420px 1fr;gap:0 30px;margin-top:8px}
+.sheet .bk h4{margin:0;text-align:center;font-weight:700;font-size:13.5px;padding:2px 0 4px}
+.sheet .bk div{border:1px solid #111;min-height:86px;padding:6px 8px;font-size:12.5px;white-space:pre-wrap}
+.sheet .sum{display:grid;grid-template-columns:90px 1fr;align-content:start;font-variant-numeric:tabular-nums;margin-top:0}
+.sheet .sum span{background:#BFBFBF;border:1px solid #111;text-align:center;font-size:13.5px;padding:3px 2px}
+.sheet .sum b{border:1px solid #111;border-left:0;text-align:right;font-weight:400;font-size:14px;padding:3px 8px}
+.sheet .sum span:nth-last-child(2),.sheet .sum b:last-child{font-weight:700;font-size:15px}
+.sheet .rules{margin-top:16px}
+.sheet .rules p{border-bottom:1px solid #111;height:26px;margin:0}
+.sheet .stamp{position:absolute;top:40px;left:98px;border:2px solid #d0452f;color:#d0452f;font-weight:700;padding:1px 10px;transform:rotate(-6deg);font-size:13px;letter-spacing:.2em}
+
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);z-index:5;
+  padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.bar .in{max-width:1320px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar .sp{flex:1}
+.sst{flex:1 1 100%;margin:0;font-size:13px;font-weight:700;padding:6px 10px;border-radius:6px;background:var(--field);color:var(--dim)}
+.sst[data-s=ok]{background:#E3F4EA;color:#1E6B3F}
+.sst[data-s=ng]{background:#FBE6E4;color:#9B2C22}
+.toast{position:fixed;left:50%;bottom:calc(80px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:99px;font-size:13px;z-index:9;max-width:90vw}
+.confirm{display:flex;gap:6px;align-items:center;font-size:12px}
+#offscreen{position:fixed;left:-10000px;top:0}
+.ov{position:fixed;inset:0;background:rgba(10,16,24,.72);z-index:20;overflow:auto;padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.ovin{max-width:560px;margin:0 auto;background:var(--panel);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.ovin p{margin:0;font-weight:700}
+.ovin img{width:100%;border:1px solid var(--line);-webkit-touch-callout:default}
+.ovb{display:flex;flex-wrap:wrap;gap:8px}.ovb .btn{flex:1 1 30%;text-decoration:none}
+
+@media (max-width:900px){
+  .tabs{display:flex}
+  .grid{grid-template-columns:minmax(0,1fr)}
+  .grid[data-view="edit"] .stage{display:none}
+  .grid[data-view="prev"] .col.edit{display:none}
+  .stage{position:static}
+}
+@media (max-width:480px){
+  .row{grid-template-columns:1fr}
+  .item{grid-template-columns:90px 1fr 28px}
+  .item .q{grid-column:1/3}
+  .bar .sp{display:none}
+  .bar .btn{flex:1 1 40%}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head><body>
+<div class="wrap">
+  <header class="top">
+    <h1>見積書メーカー<small>株式会社sunrise・版 10/25-f</small></h1>
+    <span class="sync" id="sync">保存先を確認中…</span>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tabEdit" aria-selected="true">入力</button>
+    <button role="tab" id="tabPrev" aria-selected="false">見積書を見る</button>
+  </div>
+
+  <div class="grid" id="grid" data-view="edit">
+    <div class="col edit">
+      <section class="card">
+        <h2>お客様 <span class="badge" id="sampleBadge" hidden>前回の見積書の内容です</span></h2>
+        <div class="row">
+          <div class="fld"><label for="cust">お客様名（会社名）</label><input id="cust" placeholder="株式会社〇〇"></div>
+          <div class="fld"><label>敬称</label>
+            <div class="seg"><label><input type="radio" name="hon" id="hon2" value="御中">御中</label><label><input type="radio" name="hon" id="hon1" value="様">様</label></div>
+          </div>
+        </div>
+        <div class="fld"><label for="date">発行日</label><input id="date" type="date"></div>
+      </section>
+
+      <section class="card">
+        <h2>明細 <span class="totals" style="gap:6px">合計 <b id="miniTotal">¥0</b></span></h2>
+        
+        <div class="items" id="items"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" id="addItem">＋ 行を追加</button></div>
+        <p class="note">よく使う項目（押すと行が増えます）</p>
+        <div class="presets" id="presets"></div>
+        <div class="row">
+          <div class="fld"><label for="tax">消費税</label>
+            <select id="tax"><option value="10">10%（税抜で入力）</option><option value="0">税込で入力（消費税を分けない）</option></select></div>
+          <div class="fld"><label for="disc">値引き(円)</label><input id="disc" class="num" inputmode="numeric" placeholder="0"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>備考</h2>
+        <textarea id="memo" rows="5"></textarea>
+      </section>
+
+      <details class="card" id="coCard">
+        <summary>会社情報・印鑑（一度入れれば次から自動）</summary>
+        <div class="fld"><label for="coCode">設定コード（お送りしたコードを貼り付けると、下の会社情報がまとめて入ります）</label>
+          <div style="display:flex;gap:6px"><input id="coCode" placeholder="SUNRISE:..."><button class="btn small" id="coImport">取り込む</button></div></div>
+        <div class="fld"><label for="coName">会社名</label><input id="coName"></div>
+        <div class="row">
+          <div class="fld"><label for="coZip">郵便番号</label><input id="coZip"></div>
+          <div class="fld"><label for="coRep">担当</label><input id="coRep"></div>
+        </div>
+        <div class="fld"><label for="coAddr">住所</label><input id="coAddr"></div>
+        <div class="fld"><label for="coAddr2">住所（建物名など）</label><input id="coAddr2"></div>
+        <div class="row">
+          <div class="fld"><label for="coTel">電話1</label><input id="coTel"></div>
+          <div class="fld"><label for="coTel2">電話2</label><input id="coTel2"></div>
+        </div>
+        <div class="fld"><label for="seal">角印の画像（お送りした印の画像を選ぶ）</label>
+          <div class="seal-prev"><img id="sealImg" alt="角印" hidden><input id="seal" type="file" accept="image/*"><button class="btn small" id="sealDel" hidden>外す</button></div>
+        </div>
+        <button class="btn" id="saveCo">会社情報を保存</button>
+      </details>
+
+      <section class="card">
+        <h2>保存した見積書 <button class="btn small" id="newEst">＋ 新しく作る</button></h2>
+        <div class="hist" id="hist"><p class="note">まだありません。保存すると、1回ごとにここに残ります。</p></div>
+      </section>
+    </div>
+
+    <div class="stage" id="stage">
+      <div class="viewport" id="vp"><div class="sheet" id="sheet"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="bar"><div class="in">
+  <p class="sst" id="sheetStatus" hidden></p>
+  <button class="btn" id="save">保存</button>
+  <span class="sp"></span>
+  <button class="btn" id="copyLine">文章をコピー</button>
+  <button class="btn line" id="png">画像でLINEに送る</button>
+  <button class="btn primary" id="pdf">PDFで保存</button>
+</div></div>
+<div id="offscreen"></div>
+<div class="toast" id="toast" hidden></div>
+<div class="ov" id="ov" hidden><div class="ovin">
+  <p id="ovMsg"></p>
+  <img id="ovImg" alt="見積書">
+  <div class="ovb"><a class="btn line" id="ovDl" target="_blank" rel="noopener">開く</a><a class="btn" id="ovExt" target="_blank" rel="noopener">ブラウザで開く</a><button class="btn" id="ovClose">閉じる</button></div>
+</div></div>
+
+<script src="html2canvas.min.js"></script>
+<script src="jspdf.umd.min.js"></script>
+<script src="../liff.min.js"></script>
+<script src="../config.js?v=20261028a"></script>
+<script src="../gate.js?v=20261028a"></script>
+<script src="app.js?v=20261028a"></script>
+
+</body></html>

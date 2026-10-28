@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://static.line-scdn.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://profile.line-scdn.net https://obs.line-scdn.net; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://api.line.me https://access.line.me https://liffsdk.line-scdn.net https://uts-front.line-apps.com; frame-src https://liff-subwindow.line.me; form-action 'self' https://access.line.me; base-uri 'self'; object-src 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>メンバー管理 | 株式会社sunrise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap">
+<link rel="stylesheet" href="kanri.css?v=20261028a">
+</head><body>
+<main class="wrap">
+  <header class="top">
+    <div>
+      <p class="tag">SUNRISE ／ 公式LINE</p>
+      <h1>メンバー管理</h1>
+    </div>
+    <button class="ghost" id="reload" type="button">更新</button>
+  </header>
+
+  <section class="sum" aria-label="人数">
+    <div class="n on"><b id="cOn">0</b><span>使用中</span></div>
+    <div class="n wait"><b id="cWait">0</b><span>許可待ち</span></div>
+    <div class="n ok"><b id="cOk">0</b><span>許可</span></div>
+    <div class="n off"><b id="cOff">0</b><span>停止</span></div>
+  </section>
+  <p class="upd" id="upd" aria-live="polite"></p>
+
+  <section id="secWait" hidden>
+    <h2 class="h wait">許可待ち<small>初めて開いた人。許可すると使えます。</small></h2>
+    <div class="list" id="listWait"></div>
+  </section>
+  <section id="secOk">
+    <h2 class="h">使える人<small>使用中＝今ページを開いている人</small></h2>
+    <div class="list" id="listOk"></div>
+  </section>
+  <section id="secOff" hidden>
+    <h2 class="h off">停止中<small>メニューを押しても中に入れません。</small></h2>
+    <div class="list" id="listOff"></div>
+  </section>
+  <p class="foot">名簿はスプレッドシート「sunrise 見積書一覧」の「メンバー」シートにもあります。</p>
+</main>
+<div class="toast" id="toast" role="status" hidden></div>
+<script src="../liff.min.js"></script>
+<script src="../config.js?v=20261028a"></script>
+<script src="../gate.js?v=20261028a"></script>
+<script src="kanri.js?v=20261028a"></script>
+</body></html>

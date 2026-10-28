@@ -1,6 +1,6 @@
 /* 古い画面が残っていたら、新しい画面を読み直す（LINEの中のブラウザは古い画面を覚えていることがある） */
 function keepFresh(){
-  const MY='10/26-a';
+  const MY='10/28-a';
   fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'').then(v=>{
     v=(v||'').trim();if(!v||v===MY)return;
     let tried='';try{tried=sessionStorage.getItem('mt_reload')||''}catch(e){}
@@ -197,8 +197,10 @@ $('save').onclick=async()=>{
    送り先はページに直接持たせる（スマホのブラウザが記憶を消しても届くように）。
    合言葉はページには書かない。公式LINEのメニューから開くたびに secure.json の鍵を開けて読み込む（誰でも見られる場所に置かないため）。 */
 const SHEET_URL='https://script.google.com/macros/s/AKfycbzZYlvLhkLK51jRibjiZudhDAjI-0vNLXBmvkkeV5lRLg65UL33zhD6Y-MTjpFKpIDY/exec';
-const sheetToken=()=>co.saveToken||'';
-const APP_VER='10/26-a';
+const GATE=!!(window.SunriseGate&&SunriseGate.enabled());
+// 入口チェックを使っているときは、確認済みのしるし（sid）で保存する。止められた人は保存できない
+const sheetToken=()=>GATE?(SunriseGate.sid()||''):(co.saveToken||'');
+const APP_VER='10/28-a';
 const PENDING='mt2_pending';
 function sheetBody(action){
   const c=calc(est);
@@ -206,8 +208,8 @@ function sheetBody(action){
     sub:c.sub,tax:c.tax,total:c.total,items:c.rows.map(r=>({k:r.k,n:r.n,q:r.q,u:r.u,p:num(r.p),a:r.a}))};
 }
 async function postSheet(b){
-  const tk=sheetToken();if(!tk)return {ok:false,why:'合言葉がありません。公式LINEのメニュー「見積書作成」から開き直してください',nokey:true};
-  const body=Object.assign({},b,{token:tk});
+  const tk=sheetToken();if(!tk)return {ok:false,why:GATE?'LINEの確認がまだです。公式LINEのメニュー「見積書作成」から開き直してください':'合言葉がありません。公式LINEのメニュー「見積書作成」から開き直してください',nokey:true};
+  const body=Object.assign({},b,GATE?{sid:tk}:{token:tk});
   // 1) ふつうに送って、返事を確かめる
   try{
     const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),15000);
@@ -231,7 +233,7 @@ async function sendToSheet(action){
   st.textContent=`スプレッドシートに送っています…（${action}）`;st.dataset.s='wait';
   const body=sheetBody(action);
   // 共有画面が開くとページが止まることがあるので、先に「確実に届く送り方」でも送っておく（同じものは1行にまとまる）
-  if(sheetToken()&&(action==='画像'||action==='PDF'||action==='自動保存')){try{navigator.sendBeacon&&navigator.sendBeacon(SHEET_URL,new Blob([JSON.stringify(Object.assign({},body,{token:sheetToken()}))],{type:'text/plain'}))}catch(e){}}
+  if(sheetToken()&&(action==='画像'||action==='PDF'||action==='自動保存')){try{navigator.sendBeacon&&navigator.sendBeacon(SHEET_URL,new Blob([JSON.stringify(Object.assign({},body,GATE?{sid:sheetToken()}:{token:sheetToken()}))],{type:'text/plain'}))}catch(e){}}
   const r=await postSheet(body);
   if(r.ok){st.textContent=`✓ スプレッドシートに保存しました（${hm()}・${action}${r.row?'・'+r.row+'行目':''}）`;st.dataset.s='ok';toast('スプレッドシートに保存しました');flushPending();return}
   const q=LS.get(PENDING)||[];q.push(body);LS.set(PENDING,q.slice(-30));
@@ -242,7 +244,7 @@ async function flushPending(){
   const left=[];for(const b of q){const r=await postSheet(b);if(!r.ok)left.push(b)}
   LS.set(PENDING,left);
 }
-setTimeout(flushPending,3000);
+if(!GATE)setTimeout(flushPending,3000);
 
 function drawHist(){
   const el=$('hist');
@@ -321,14 +323,13 @@ fill();
 
 /* ---------- 公式LINEのメニューから開いたとき：会社情報と角印を自動で入れる ----------
    メニューのリンク末尾の #k=… が鍵。secure.json（鍵がないと読めない形で保存）を開いて、このスマホに保存する。 */
-(async function unlockCompany(){
-  const m=location.hash.match(/k=([A-Za-z0-9_-]{16,})/);
-  if(!m||!window.crypto||!crypto.subtle)return;
+async function unlockCompany(k){
+  if(!k||!/^[A-Za-z0-9_-]{16,}$/.test(k)||!window.crypto||!crypto.subtle)return;
   const b=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((s.length+3)%4)),c=>c.charCodeAt(0));
   try{
     const r=await fetch('secure.json',{cache:'no-store'});if(!r.ok)return;
     const j=await r.json();
-    const key=await crypto.subtle.importKey('raw',b(m[1]),'AES-GCM',false,['decrypt']);
+    const key=await crypto.subtle.importKey('raw',b(k),'AES-GCM',false,['decrypt']);
     const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:b(j.iv)},key,b(j.ct));
     const o=JSON.parse(new TextDecoder().decode(plain));
     [...C,'seal','saveUrl','saveToken'].forEach(k=>{if(typeof o[k]==='string'&&o[k])co[k]=o[k]});
@@ -339,4 +340,23 @@ fill();
     // 鍵（#k=…）をアドレス欄から消す。リンクをコピーして人に送っても鍵が漏れないように
     try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
   }catch(e){}
-})();
+}
+
+/* ---------- 入口チェック ----------
+   入口チェックなし（config.js の liffId が空）：今までどおり、メニューのリンク末尾 #k=… で会社情報を開く。
+   入口チェックあり：LINEで本人確認 → 松浦様が「許可」した人にだけ、Apps Script が会社情報の鍵を渡す。
+   「停止」された人は、このスマホに残っている会社情報・合言葉・見積書の控えを消して、画面を閉じる。 */
+function forgetEverything(){
+  try{Object.keys(localStorage).filter(k=>/^mt2?_/.test(k)).forEach(k=>localStorage.removeItem(k))}catch(e){}
+  co=Object.assign({},DEFAULT_CO);saved=[];
+}
+if(GATE){
+  // 古いメニューの鍵（#k=…）はもう使わない。アドレス欄からも消す
+  if(/k=/.test(location.hash)){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
+  SunriseGate.start({page:'mitsumori',
+    onAllowed:async res=>{if(res.key)await unlockCompany(res.key);flushPending()},
+    onBlocked:forgetEverything});
+}else{
+  const m=location.hash.match(/k=([A-Za-z0-9_-]{16,})/);
+  if(m)unlockCompany(m[1]);
+}
