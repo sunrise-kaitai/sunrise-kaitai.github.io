@@ -1,6 +1,6 @@
 /* 古い画面が残っていたら、新しい画面を読み直す（LINEの中のブラウザは古い画面を覚えていることがある） */
 function keepFresh(){
-  const MY='10/28-a';
+  const MY='10/28-b';
   fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'').then(v=>{
     v=(v||'').trim();if(!v||v===MY)return;
     let tried='';try{tried=sessionStorage.getItem('mt_reload')||''}catch(e){}

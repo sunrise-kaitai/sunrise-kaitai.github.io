@@ -62,6 +62,24 @@
     root.hidden = false;
     document.documentElement.style.overflow = 'hidden';
   }
+  // 管理者がメニューから開いたときだけ、右下に「メンバー管理」へのボタンを出す（公式LINEから管理画面へ行けるように）
+  function adminButton() {
+    if (document.getElementById('sg-admin')) return;
+    var st = document.createElement('style');
+    st.textContent = '#sg-admin{display:inline-block;flex:none;' +
+      'background:#111;color:#ff6a1a;border:2px solid #ff6a1a;border-radius:999px;padding:7px 14px;font:700 14px/1.2 "BIZ UDPGothic","Hiragino Sans",sans-serif;text-decoration:none;}' +
+      '#sg-admin:focus-visible{outline:3px solid #fff;outline-offset:2px}@media print{#sg-admin{display:none}}';
+    document.head.appendChild(st);
+    var a = document.createElement('a');
+    a.id = 'sg-admin';
+    a.href = '../kanri/';
+    a.textContent = 'メンバー管理';
+    a.setAttribute('data-html2canvas-ignore', 'true');
+    // ページの見出しの並びに入れる（見出しがないページは右上に置く）
+    var head = document.querySelector('header.top');
+    if (head) head.appendChild(a);
+    else { a.style.position = 'fixed'; a.style.right = '12px'; a.style.top = '10px'; a.style.zIndex = '2147482000'; document.body.appendChild(a); }
+  }
   function hide() { if (el) el.hidden = true; document.documentElement.style.overflow = ''; }
 
   /* ---------- Apps Script とのやりとり ---------- */
@@ -114,6 +132,7 @@
       try { sessionStorage.setItem('sg_sid', state.sid); } catch (e) {}
       hide();
       startPing();
+      if (res.admin && o.page !== 'kanri') adminButton();
       if (o.onAllowed) o.onAllowed(res);
       return;
     }
