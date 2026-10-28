@@ -151,10 +151,10 @@
 **3. Claude に「LIFF ID」を送る** → サイトに入れて公開します（ここで入口チェックが始まります）
 
 **4. 松浦様が最初に管理画面を開く**
-`https://liff.line.me/<LIFF ID>/kanri/` を松浦様のLINEで開く。最初に開いた人が管理者になります。
+`https://liff.line.me/2012260278-4lkJYixg/kanri/` を松浦様のLINEで開く。最初に開いた人が管理者になります。
 ※ 必ず松浦様が一番に開いてください。
 
 **5. 公式LINEのメニューのリンクを差し替える**
-- 見積書作成 → `https://liff.line.me/<LIFF ID>/mitsumori/`
+- 見積書作成 → `https://liff.line.me/2012260278-4lkJYixg/mitsumori/`
 - スレッズ投稿 → `https://liff.line.me/<LIFF ID>/threads/`
 社員の方がメニューを押すと「許可待ち」になるので、管理画面で「許可」を押してください。

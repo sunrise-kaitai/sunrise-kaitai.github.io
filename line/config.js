@@ -2,6 +2,6 @@
    liffId が空のあいだは入口チェックを使わない（今までどおり誰でも開ける）。
    LINE Developers で LIFF アプリを作ったら、その「LIFF ID」をここに入れて公開すると入口チェックが始まる。 */
 window.SUNRISE_LINE = {
-  liffId: '',
+  liffId: '2012260278-4lkJYixg',
   api: 'https://script.google.com/macros/s/AKfycbzZYlvLhkLK51jRibjiZudhDAjI-0vNLXBmvkkeV5lRLg65UL33zhD6Y-MTjpFKpIDY/exec'
 };
