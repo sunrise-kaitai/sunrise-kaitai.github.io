@@ -70,7 +70,7 @@ addEventListener('keydown',function(e){if(e.key==='Escape'&&!lb.hidden)cl();});
 document.querySelectorAll('.fq button').forEach(function(q){q.addEventListener('click',function(){var o=q.getAttribute('aria-expanded')==='true';q.setAttribute('aria-expanded',String(!o));q.nextElementSibling.hidden=o;});});
 var t=document.getElementById('toast');function toast(m){t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('on')},1800);}
 document.getElementById('copy').addEventListener('click',function(){function sel(){var r=document.createRange();r.selectNodeContents(document.getElementById('num'));var s=getSelection();s.removeAllRanges();s.addRange(r);toast('番号を選択しました');}
-  try{navigator.clipboard.writeText('090-7686-6461').then(function(){toast('番号をコピーしました')},sel);}catch(e){sel()}});
+  try{navigator.clipboard.writeText('090-9182-0512').then(function(){toast('番号をコピーしました')},sel);}catch(e){sel()}});
 })();
 /* 右上のメニュー（ホームページ本体と同じ行き先） */
 (function(){var nav=document.getElementById('rnav'),op=document.getElementById('rnav-open'),cl=document.getElementById('rnav-close');if(!nav||!op||!cl)return;

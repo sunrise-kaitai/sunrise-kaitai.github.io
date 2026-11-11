@@ -313,7 +313,7 @@ const FORM_ENDPOINT='https://script.google.com/macros/s/AKfycbzMB2zlNcDNW7qnFhyj
       f.querySelectorAll('input:not([type=radio]),textarea').forEach(i=>i.value='');
       done.innerHTML='送信しました。<br>内容を確認のうえ、担当者よりご連絡します。';done.hidden=false;
     }catch(_){
-      done.innerHTML='送信できませんでした。<br>お手数ですが、お電話（090-7686-6461）でご連絡ください。<br><span class="todo">※ このプレビュー画面からは送信できません。本番公開後に届くようになります。</span>';done.hidden=false;
+      done.innerHTML='送信できませんでした。<br>お手数ですが、お電話（090-9182-0512）でご連絡ください。<br><span class="todo">※ このプレビュー画面からは送信できません。本番公開後に届くようになります。</span>';done.hidden=false;
     }finally{btn.disabled=false;btn.firstChild.textContent='SEND ';}
   });
 })();

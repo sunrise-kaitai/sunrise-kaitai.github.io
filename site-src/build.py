@@ -17,7 +17,7 @@ from urllib.parse import urlparse
 BASE = urlparse(DOMAIN).path.rstrip('/') if DOMAIN else ''
 
 AREA = ['愛知県', '岐阜県', '三重県', '静岡県', '滋賀県']
-TEL = '090-7686-6461'
+TEL = '090-9182-0512'
 WITH_EXTRA = True
 IMG_EXT = 'webp'
 
@@ -118,7 +118,7 @@ ORG = {
   "name": "株式会社sunrise",
   "alternateName": "sunrise",
   "description": "愛知県あま市の解体工事会社。建屋解体・内装解体・原状回復・アスベスト調査・除去。",
-  "telephone": "+81-90-7686-6461",
+  "telephone": "+81-90-9182-0512",
   "address": {"@type": "PostalAddress", "postalCode": "490-1111", "addressRegion": "愛知県", "addressLocality": "あま市", "streetAddress": "甚目寺五位田98", "addressCountry": "JP"},
   "areaServed": [{"@type": "AdministrativeArea", "name": a} for a in AREA],
   "founder": {"@type": "Person", "name": "松浦 恒裕"},
