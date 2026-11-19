@@ -21,7 +21,8 @@ const MEMBER_SHEET = 'メンバー';
 const MEMBER_HEAD = ['LINEのID', '名前', 'アイコン', '状態', '最初に開いた日時', '最後に使った日時', '使っていたページ', '管理者', 'メモ'];
 const M = { id: 0, name: 1, pic: 2, status: 3, first: 4, last: 5, page: 6, admin: 7, memo: 8 };
 const STATUSES = ['許可', '承認待ち', '停止'];
-const PAGES = { mitsumori: '見積書作成', threads: 'スレッズ投稿', kanri: '管理画面' };
+const PAGES = { mitsumori: '見積書作成', threads: 'スレッズ投稿', kanri: '管理画面', hp: 'ホームページ管理' };
+const ADMIN_PAGES = ['kanri', 'hp']; // 管理者だけが開けるページ
 const SESSION_SEC = 6 * 60 * 60; // 1回の確認で使える時間（6時間。過ぎたら自動で確認し直す）
 
 const out_ = (o) => ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
@@ -75,6 +76,11 @@ function doPost(e) {
       case 'ping': return out_(ping_(d));
       case 'members': return out_(members_(d));
       case 'setStatus': return out_(setStatus_(d));
+      // ホームページ管理（ops/hp-admin.gs）
+      case 'hpSave': return out_(hpSave_(d));
+      case 'postSave': return out_(postSave_(d));
+      case 'postDelete': return out_(postDelete_(d));
+      case 'snsStatus': return out_(snsStatus_(d));
       default: return out_(save_(d));
     }
   } catch (err) {
@@ -147,9 +153,10 @@ function gate_(d) {
   const admin = isAdmin_(m);
   // 管理者は「停止」にできない（自分を締め出さないように）
   const status = admin ? '許可' : String(m.v[M.status] || '承認待ち');
-  const res = { ok: true, status, name: u.name, pic: u.pic, admin };
+  // hp: ホームページ管理（ops/hp-admin.gs）が入っている印。管理画面はこれがないと何もしない
+  const res = { ok: true, status, name: u.name, pic: u.pic, admin, hp: typeof hpSave_ === 'function' };
   if (status === '許可') {
-    if (page === 'kanri' && !admin) return { ok: true, status: '管理者のみ', name: u.name, pic: u.pic, admin: false };
+    if (ADMIN_PAGES.indexOf(page) >= 0 && !admin) return { ok: true, status: '管理者のみ', name: u.name, pic: u.pic, admin: false };
     const sid = Utilities.getUuid() + Utilities.getUuid().slice(0, 8);
     cache.put('sid:' + sid, u.id, SESSION_SEC);
     res.sid = sid;

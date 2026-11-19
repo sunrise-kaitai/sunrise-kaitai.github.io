@@ -69,3 +69,7 @@ section[hidden]{display:none}
   .acts{grid-column:1/-1;justify-content:stretch}
   .acts .b{flex:1}
 }
+
+/* ホームページ管理へのボタン */
+.top-r{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+a.ghost{color:var(--ink);text-decoration:none;display:inline-block}

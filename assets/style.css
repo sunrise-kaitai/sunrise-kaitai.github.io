@@ -765,3 +765,18 @@ h1,h2,h3,.svc-lead,.pg-lead,.a-jp,.rec-lead{word-break:auto-phrase;text-wrap:bal
 .nav-list b{font-size:clamp(40px,min(4.4vw,8.2svh),88px)!important}
 .nav-close{right:calc(var(--nl) + 20px)!important;color:#fff!important;border-color:rgba(255,255,255,.85)!important;background:rgba(0,0,0,.35)!important}
 }
+
+/* ---------- ブログ・お知らせ ---------- */
+.blog-cat{display:inline-block;margin-left:10px;padding:1px 8px;font-size:11px;letter-spacing:.08em;border:1px solid var(--line);border-radius:2px}
+.blog-cat-news{background:var(--sun);color:#fff;border-color:var(--sun)}
+.blog-noph{display:flex;align-items:center;justify-content:center;background:#17263D;color:rgba(255,255,255,.5);font-weight:800;letter-spacing:.3em;aspect-ratio:4/3}
+.blog-empty{color:var(--body)}
+.blog-art{max-width:880px}
+.blog-art p{white-space:normal}
+.blog-gal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:1.6em 0}
+.blog-gal figure{margin:0}
+.blog-gal img{width:100%;height:auto;display:block}
+.blog-home{padding-top:clamp(28px,4vw,56px);padding-bottom:clamp(28px,4vw,56px)}
+.blog-home .more{margin-top:16px}
+.blog-hd-nophoto{grid-template-columns:1fr!important}
+@media (max-width:560px){.blog-gal{grid-template-columns:1fr}}
