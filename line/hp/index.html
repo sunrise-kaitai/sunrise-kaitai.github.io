@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://static.line-scdn.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://profile.line-scdn.net https://obs.line-scdn.net; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://api.line.me https://access.line.me https://liffsdk.line-scdn.net https://uts-front.line-apps.com; frame-src 'self' https://liff-subwindow.line.me; form-action 'self' https://access.line.me; base-uri 'self'; object-src 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>ホームページ管理 | 株式会社sunrise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap">
+<link rel="stylesheet" href="hp.css?v=20261119a">
+</head><body>
+<main class="wrap">
+  <header class="top">
+    <div>
+      <p class="tag">SUNRISE ／ 公式LINE</p>
+      <h1>ホームページ管理</h1>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="やること">
+    <button type="button" role="tab" id="tabPage" aria-selected="true" aria-controls="viewPage">ページを直す</button>
+    <button type="button" role="tab" id="tabBlog" aria-selected="false" aria-controls="viewBlog">ブログ・お知らせ</button>
+    <button type="button" role="tab" id="tabSns" aria-selected="false" aria-controls="viewSns">インスタ・Google</button>
+  </nav>
+
+  <!-- ページを直す -->
+  <section id="viewPage" role="tabpanel" aria-labelledby="tabPage">
+    <div class="bar">
+      <label class="sel"><span>直すページ</span><select id="pageSel"></select></label>
+      <div class="seg" role="group" aria-label="表示の大きさ">
+        <button type="button" id="vwSp" aria-pressed="true">スマホ</button>
+        <button type="button" id="vwPc" aria-pressed="false">パソコン</button>
+      </div>
+    </div>
+    <p class="hint">オレンジの点線で囲まれた<b>文字</b>や<b>写真</b>を押すと、直せます。</p>
+    <div class="frame" id="frameBox"><iframe id="frame" title="ホームページ"></iframe></div>
+  </section>
+
+  <!-- ブログ・お知らせ -->
+  <section id="viewBlog" role="tabpanel" aria-labelledby="tabBlog" hidden>
+    <div id="blogList">
+      <button type="button" class="big" id="newPost">＋ 新しく書く</button>
+      <div class="list" id="posts"></div>
+    </div>
+    <form id="postForm" hidden novalidate>
+      <div class="fhead">
+        <button type="button" class="ghost" id="postBack">← 一覧へ</button>
+        <h2 id="postHead">新しく書く</h2>
+      </div>
+      <fieldset class="radio">
+        <legend>種類</legend>
+        <label><input type="radio" name="cat" value="blog" checked> ブログ</label>
+        <label><input type="radio" name="cat" value="news"> お知らせ</label>
+      </fieldset>
+      <label class="f"><span>日付</span><input type="date" id="pDate" required></label>
+      <label class="f"><span>題名 <em>必須</em></span><input type="text" id="pTitle" maxlength="120" placeholder="例：あま市で木造住宅の解体をしました" required></label>
+      <label class="f"><span>本文</span>
+        <textarea id="pBody" rows="10" maxlength="20000" placeholder="1行あけると段落が分かれます。&#10;行のはじめに「■」を付けると見出しになります。"></textarea>
+      </label>
+      <div class="f">
+        <span>写真（10枚まで。1枚目が表紙になります）</span>
+        <div class="photos" id="pPhotos"></div>
+        <label class="ghost file">写真をえらぶ<input type="file" id="pFile" accept="image/*" multiple></label>
+      </div>
+      <fieldset class="sns" id="snsBox">
+        <legend>一緒に投稿する</legend>
+        <label><input type="checkbox" id="snsIg"> インスタグラム <small id="igNote"></small></label>
+        <label><input type="checkbox" id="snsGbp"> Googleマップ（ビジネスプロフィール）<small id="gbpNote"></small></label>
+        <label class="f" id="snsTextBox" hidden><span>インスタ・Googleに載せる文章（自動で作りました。直せます）</span>
+          <textarea id="snsText" rows="6" maxlength="1400"></textarea>
+        </label>
+      </fieldset>
+      <p class="err" id="postErr" role="alert" hidden></p>
+      <div class="actions">
+        <button type="submit" class="big" id="postSave">公開する</button>
+        <button type="button" class="danger" id="postDel" hidden>この記事を消す</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- インスタ・Google -->
+  <section id="viewSns" role="tabpanel" aria-labelledby="tabSns" hidden>
+    <div class="list" id="snsState"><p class="hint">読み込み中…</p></div>
+    <h2 class="h">最近の投稿</h2>
+    <div class="list" id="snsLog"></div>
+    <p class="foot">つなぐ設定は、手順書（ops/hp-admin-setup.md）のとおりに一度だけ行います。</p>
+  </section>
+</main>
+
+<!-- 直すときに下から出る欄 -->
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="false" aria-labelledby="sheetH">
+  <div class="sheet-in">
+    <div class="sheet-hd"><h2 id="sheetH">文字を直す</h2><button type="button" class="ghost" id="sheetClose">閉じる</button></div>
+    <p class="note" id="sheetNote" hidden></p>
+    <div id="sheetBody"></div>
+    <div class="actions">
+      <button type="button" class="big" id="sheetOk">決定</button>
+      <button type="button" class="ghost" id="sheetReset" hidden>最初の状態に戻す</button>
+    </div>
+  </div>
+</div>
+
+<!-- 変更の件数と公開ボタン -->
+<div class="dock" id="dock" hidden>
+  <span id="dockN">変更 0件</span>
+  <button type="button" class="ghost" id="dockUndo">やめる</button>
+  <button type="button" class="big" id="dockSave">公開する</button>
+</div>
+
+<div class="busy" id="busy" hidden role="status"><div class="spin"></div><p id="busyT">保存しています…</p></div>
+<div class="toast" id="toast" role="status" hidden></div>
+<script src="../liff.min.js"></script>
+<script src="../config.js?v=20261028a"></script>
+<script src="../gate.js?v=20261119a"></script>
+<script src="hp.js?v=20261119a"></script>
+</body></html>

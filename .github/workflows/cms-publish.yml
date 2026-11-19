@@ -1,0 +1,45 @@
+name: 管理画面の変更を公開
+# 管理画面（/line/hp/）で直した文字・写真・ブログは、Apps Script が site-src/content/ に保存する。
+# 保存されたら、ここでページを作り直して（publish.sh）main に入れ、GitHub Pages で公開する。
+# 公開したら、検索エンジンへの通知（indexnow.yml）も動かす。GitHub の無料枠で動く。
+on:
+  push:
+    branches: [main]
+    paths: ['site-src/content/**']
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: cms-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: 部品の準備
+        run: pip install -q pillow
+      - name: ページを作り直す（検査つき）
+        run: ./publish.sh
+      - name: main に入れる
+        run: |
+          git config user.name "sunrise-cms"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -q -m "管理画面の変更を公開"
+          for i in 1 2 3; do
+            git pull -q --rebase origin main && git push -q origin HEAD:main && break
+            sleep 5
+          done
+      - name: 検索エンジンへ通知
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run indexnow.yml --ref main || true

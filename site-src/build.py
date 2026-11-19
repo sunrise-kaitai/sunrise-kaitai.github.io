@@ -7,6 +7,8 @@ import re, json, os, shutil, html
 import extra
 import recruit
 import service_detail   # サービス4ページの詳しい解説（対応物件・費用の要素・近隣対策・トラブル）
+import blog            # ブログ・お知らせ（管理画面から書いた記事）
+import cms             # 管理画面（/line/hp/）で直した文字・写真の反映
 import region           # 地域ページ（あま市・名古屋市・海部津島）
 
 SRC = open('src/site.html', encoding='utf-8').read()
@@ -55,13 +57,15 @@ EXTRA['recruit'] = dict(file='recruit.html', jp='採用情報', en='Recruit', ti
 for _r in region.REGIONS:
     EXTRA['area-' + _r['slug']] = dict(file='area-%s.html' % _r['slug'], jp=_r['jp'], en='Area',
                                        title=_r['title'], desc=_r['desc'], reg=_r)
+# ブログ・お知らせ（管理画面から書いた記事。content/posts/*.json）
+blog.register(EXTRA)
 for _c in extra.COLUMNS:
     EXTRA['col-' + _c['slug']] = dict(file='column/%s.html' % _c['slug'], jp=_c['short'], en='Column',
                                       title=_c['title'] + '｜株式会社sunrise', desc=_c['desc'], col=_c)
 
 # ---------- split source ----------
 head_links = re.search(r'(<link rel="preconnect".*?<link rel="stylesheet"[^>]*>)', SRC, re.S).group(1)
-css = re.search(r'<style>(.*?)</style>', SRC, re.S).group(1) + extra.EXTRA_CSS
+css = re.search(r'<style>(.*?)</style>', SRC, re.S).group(1) + extra.EXTRA_CSS + blog.CSS
 js = re.search(r'<script>(.*?)</script>\s*$', SRC, re.S).group(1)
 header = re.search(r'(<header class="hd".*?</header>)', SRC, re.S).group(1)
 nav = re.search(r'(<nav class="nav".*?</nav>)', SRC, re.S).group(1)
@@ -138,7 +142,7 @@ def faq_ld(h):
 
 # 同じ名前のページとフォルダ（column.html と column/）があると GitHub Pages では /column が開けないため、
 # こうしたページはフォルダの index.html として書き出し、アドレスは /column/ にする。
-DIR_INDEX = {'column.html'}
+DIR_INDEX = {'column.html', 'blog.html'}
 
 def pretty(file):
     if file == 'index.html':
@@ -208,6 +212,8 @@ def head(key):
             trail.append(('コラム', url('column.html')))
         if 'reg' in p:
             trail.append(('対応エリア', url('area.html')))
+        if 'post' in p:
+            trail.append(('ブログ・お知らせ', url('blog.html')))
         trail.append((p['jp'], u))
         crumbs = [{"@type": "ListItem", "position": i + 1, "name": n, "item": it} for i, (n, it) in enumerate(trail)]
         lines.append(jsonld({"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": crumbs}))
@@ -219,6 +225,10 @@ def head(key):
                              "author": {"@type": "Organization", "name": "株式会社sunrise", "url": DOMAIN},
                              "publisher": {"@type": "Organization", "name": "株式会社sunrise",
                                            "logo": {"@type": "ImageObject", "url": DOMAIN.rstrip('/') + '/img/apple-touch-icon.png'}}}))
+    if 'post' in p and DOMAIN:
+        lines.append(jsonld(blog.jsonld(p['post'], DOMAIN, u)))
+        if p['post']['photos']:
+            lines[10] = f'<meta property="og:image" content="{DOMAIN.rstrip("/")}/img/{p["post"]["photos"][0]}">'
     if key in SVC:
         lines.append(jsonld({"@context": "https://schema.org", "@type": "Service", "name": p['jp'], "serviceType": p['jp'],
                              "provider": {"@type": "GeneralContractor", "name": "株式会社sunrise"},
@@ -253,6 +263,10 @@ def body(key):
             main = extra.faq_page(sf)
         elif key == 'column':
             main = extra.column_index()
+        elif key == 'blog':
+            main = blog.index_page()
+        elif 'post' in p:
+            main = blog.post_page(p['post'])
         else:
             main = extra.column_page(p['col'])
         main = fill_alts(main, p['jp'] + 'の関連写真')
@@ -279,7 +293,7 @@ def body(key):
     ft = footer
     if WITH_EXTRA:
         ft = ft.replace('<a href="#contact">Contact</a></nav>',
-                        '<a href="area.html">Area</a><a href="faq.html">FAQ</a><a href="column.html">Column</a><a href="#contact">Contact</a></nav>', 1)
+                        '<a href="area.html">Area</a><a href="faq.html">FAQ</a><a href="column.html">Column</a>' + ('<a href="blog.html">Blog</a>' if blog.POSTS else '') + '<a href="#contact">Contact</a></nav>', 1)
         # 地域ページへのリンク（フッター）
         ft = ft.replace('</nav>\n  </div>', '</nav>\n    <nav class="ft-reg" aria-label="地域別のご案内">'
                         + ''.join(f'<a href="{f}">{t}</a>' for f, t in region.LINK_LABELS) + '</nav>\n  </div>', 1)
@@ -289,6 +303,8 @@ def body(key):
             main = main.replace('<p class="map-src">', '<p><a class="more" href="area.html">対応市町村を見る <i>→</i></a></p>\n    '
                                 '<p class="map-note map-reg">地域別のご案内：' + '／'.join(f'<a href="{f}">{t}</a>' for f, t in region.LINK_LABELS)
                                 + '</p>\n    <p class="map-src">', 1)
+    if is_home and WITH_EXTRA and blog.POSTS:
+        main = main + '\n' + blog.home_block()
     parts = [header, nav_h, '<main>', main, contact, '</main>', ft]
     b = '\n\n'.join(parts)
     b = rewrite(b, is_home)
@@ -453,8 +469,12 @@ if DOMAIN and not urlparse(DOMAIN).netloc.endswith('github.io'):
 write('dist/_headers', "/assets/*\n  Cache-Control: public, max-age=604800\n/img/*\n  Cache-Control: public, max-age=2592000\n"
                        "/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n")
 
+# ---------- ブログの一覧データと、管理画面で直した文字・写真の反映 ----------
+write('dist/blog/posts.json', blog.posts_json(DOMAIN or ''))
+print('管理画面の書き換えを反映:', cms.run('dist', BASE), 'ページ')
+
 # robots / sitemap
-robots = 'User-agent: *\nAllow: /\nDisallow: /mitsumori/\nDisallow: /line/\n' + (f'Sitemap: {DOMAIN.rstrip("/")}/sitemap.xml\n' if DOMAIN else '')
+robots = 'User-agent: *\nAllow: /\nDisallow: /mitsumori/\nDisallow: /line/\nDisallow: /cms/\n' + (f'Sitemap: {DOMAIN.rstrip("/")}/sitemap.xml\n' if DOMAIN else '')
 open('dist/robots.txt', 'w').write(robots)
 if DOMAIN:
     import datetime
